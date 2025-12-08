@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,700,900');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f3f4f6; /* Tailwind's gray-100 */
+    margin: 0;
+    padding: 0;
+}
