@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Window;
 use App\Models\Queue;
+use Carbon\Carbon;
 
 class DisplayController extends Controller
 {
@@ -23,6 +24,11 @@ class DisplayController extends Controller
 
         $statistics = Queue::getStatistics();
 
-        return view('display.index', compact('windows', 'waitingQueues', 'statistics'));
+        $count = Queue::where('status', 'serving')
+            ->where('updated_at', '>=', Carbon::now()->subSeconds(3))
+            ->count();
+        $ringBell = $count > 0 ? true : false;
+
+        return view('display.index', compact('windows', 'waitingQueues', 'statistics', 'ringBell'));
     }
 }

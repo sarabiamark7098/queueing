@@ -41,7 +41,7 @@ class Queue extends Model
             ? intval(substr($lastQueue->queue_number, -4)) + 1
             : 1;
 
-        return 'Q-W' . $windowId . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        return 'W' . $windowId . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
     /**
