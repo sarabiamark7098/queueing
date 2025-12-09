@@ -51,7 +51,14 @@
 
 @push('scripts')
 <script>
+
+// if $ringBell is true, play public/bellmark.wav
+@if ($ringBell)
+    var audio = new Audio('{{ asset('bellmark.wav') }}'); // Replace with the path to your sound file ('public/bellmark.wav');
+    audio.play();
+@endif
+
 // Auto-refresh every 5 seconds for display board
-setInterval(() => location.reload(), 5000);
+setInterval(() => location.reload(), 3000);
 </script>
 @endpush
