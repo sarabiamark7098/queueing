@@ -161,6 +161,8 @@
 @push('scripts')
 <script>
 const windowNumber = {{ $window->window_number }};
+let refreshInterval = null;
+let lastDataHash = '';
 
 function callNext() {
     $('#btn-call-next').prop('disabled', true);
@@ -279,137 +281,134 @@ function callSpecific(queueId) {
 function refreshWindowData() {
     $.get(`/api/window/${windowNumber}/data`)
         .done(function(data) {
-            // Update substep 1
-            if (data.window.substep1_queue) {
-                $('#substep1-content').html(`
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-blue-600 mb-4">${data.window.substep1_queue.queue_number}</div>
-                        <button onclick="moveToSubstep2()"
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
-                            <span>Move to Step 2</span>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                            </svg>
-                        </button>
-                    </div>
-                `);
-            } else {
-                $('#substep1-content').html(`
-                    <div class="text-center text-gray-400 py-8">
-                        <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p>Empty</p>
-                    </div>
-                `);
-            }
+            // Create data hash to check if changed
+            const dataHash = JSON.stringify(data);
+            if (dataHash === lastDataHash) return;
+            lastDataHash = dataHash;
 
-            // Update substep 2
-            if (data.window.substep2_queue) {
-                $('#substep2-content').html(`
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-purple-600 mb-4">${data.window.substep2_queue.queue_number}</div>
-                        <button onclick="moveToSubstep3()"
-                                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
-                            <span>Move to Step 3</span>
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                            </svg>
-                        </button>
-                    </div>
-                `);
-            } else {
-                $('#substep2-content').html(`
-                    <div class="text-center text-gray-400 py-8">
-                        <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p>Empty</p>
-                    </div>
-                `);
-            }
-
-            // Update substep 3
-            if (data.window.substep3_queue) {
-                $('#substep3-content').html(`
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-green-600 mb-4">${data.window.substep3_queue.queue_number}</div>
-                        <button onclick="completeSubstep3()"
-                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>Complete</span>
-                        </button>
-                    </div>
-                `);
-            } else {
-                $('#substep3-content').html(`
-                    <div class="text-center text-gray-400 py-8">
-                        <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p>Empty</p>
-                    </div>
-                `);
-            }
-
-            // Update waiting queue
-            $('#waiting-count').text(data.waiting_queues.length);
-            let waitingHtml = '';
-            if (data.waiting_queues.length > 0) {
-                data.waiting_queues.slice(0, 5).forEach(function(queue, index) {
-                    waitingHtml += `
-                        <div class="p-3 bg-white rounded-lg flex items-center space-x-4 border">
-                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center font-bold text-orange-600">
-                                ${index + 1}
-                            </div>
-                            <div class="font-bold text-gray-800 text-lg">${queue.queue_number}</div>
-                        </div>
-                    `;
-                });
-            } else {
-                waitingHtml = `
-                    <div class="text-center py-8 text-gray-400">
-                        <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                        </svg>
-                        <p>No customers waiting</p>
-                    </div>
-                `;
-            }
-            $('#waiting-list').html(waitingHtml);
-
-            // Enable/disable buttons
-            const hasWaiting = data.waiting_queues.length > 0;
-            const hasSubstep1 = data.window.substep1_queue !== null;
-            $('#btn-call-next').prop('disabled', !hasWaiting || hasSubstep1);
-            $('#btn-select-queue').prop('disabled', !hasWaiting || hasSubstep1);
+            updateSubstepDisplay(data);
         });
+}
+
+function updateSubstepDisplay(data) {
+    // Update substep 1
+    $('#substep1-content').html(data.window.substep1_queue ? `
+        <div class="text-center">
+            <div class="text-4xl font-bold text-blue-600 mb-4">${data.window.substep1_queue.queue_number}</div>
+            <button onclick="moveToSubstep2()"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
+                <span>Move to Step 2</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+            </button>
+        </div>
+    ` : `
+        <div class="text-center text-gray-400 py-8">
+            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p>Empty</p>
+        </div>
+    `);
+
+    // Update substep 2
+    $('#substep2-content').html(data.window.substep2_queue ? `
+        <div class="text-center">
+            <div class="text-4xl font-bold text-purple-600 mb-4">${data.window.substep2_queue.queue_number}</div>
+            <button onclick="moveToSubstep3()"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
+                <span>Move to Step 3</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+            </button>
+        </div>
+    ` : `
+        <div class="text-center text-gray-400 py-8">
+            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p>Empty</p>
+        </div>
+    `);
+
+    // Update substep 3
+    $('#substep3-content').html(data.window.substep3_queue ? `
+        <div class="text-center">
+            <div class="text-4xl font-bold text-green-600 mb-4">${data.window.substep3_queue.queue_number}</div>
+            <button onclick="completeSubstep3()"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Complete</span>
+            </button>
+        </div>
+    ` : `
+        <div class="text-center text-gray-400 py-8">
+            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p>Empty</p>
+        </div>
+    `);
+
+    // Update waiting queue
+    $('#waiting-count').text(data.waiting_queues.length);
+    let waitingHtml = data.waiting_queues.length > 0 ?
+        data.waiting_queues.slice(0, 5).map((queue, index) => `
+            <div class="p-3 bg-white rounded-lg flex items-center space-x-4 border">
+                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center font-bold text-orange-600">
+                    ${index + 1}
+                </div>
+                <div class="font-bold text-gray-800 text-lg">${queue.queue_number}</div>
+            </div>
+        `).join('') : `
+            <div class="text-center py-8 text-gray-400">
+                <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <p>No customers waiting</p>
+            </div>
+        `;
+    $('#waiting-list').html(waitingHtml);
+
+    // Enable/disable buttons
+    const hasWaiting = data.waiting_queues.length > 0;
+    const hasSubstep1 = data.window.substep1_queue !== null;
+    $('#btn-call-next').prop('disabled', !hasWaiting || hasSubstep1);
+    $('#btn-select-queue').prop('disabled', !hasWaiting || hasSubstep1);
 }
 
 function showNotification(message, type) {
     const colors = {
         success: 'bg-green-500',
-         error: 'bg-red-500',
-    info: 'bg-blue-500'
-};
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+    };
 
-const notification = $(`
-    <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
-        ${message}
-    </div>
-`);
+    const notification = $(`
+        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+            ${message}
+        </div>
+    `);
 
-$('body').append(notification);
-
-setTimeout(() => {
-    notification.fadeOut(300, function() {
-        $(this).remove();
-    });
-}, 3000);
+    $('body').append(notification);
+    setTimeout(() => notification.fadeOut(300, function() { $(this).remove(); }), 3000);
 }
-// Auto-refresh every 3 seconds
-setInterval(refreshWindowData, 3000);
+
+// OPTIMIZED: Refresh every 5 seconds
+refreshInterval = setInterval(refreshWindowData, 5000);
+
+// Stop refresh when tab is hidden
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        clearInterval(refreshInterval);
+    } else {
+        refreshWindowData();
+        refreshInterval = setInterval(refreshWindowData, 5000);
+    }
+});
 </script>
 @endpush

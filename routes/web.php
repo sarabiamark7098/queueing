@@ -44,4 +44,5 @@ Route::prefix('api')->group(function () {
     Route::get('/queues/window/{number}/statistics', [QueueController::class, 'getWindowStatistics']);
     Route::get('/window/{number}/data', [WindowController::class, 'getData']);
     Route::get('/display/data', [DisplayController::class, 'getData']);
+    Route::get('/system/all-data', [DisplayController::class, 'getAllData']);
 });

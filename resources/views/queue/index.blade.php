@@ -14,11 +14,7 @@
                 <h1 class="text-4xl font-bold text-gray-800 mb-2">Queue Generation</h1>
                 <p class="text-gray-600">Click a window to generate queue number instantly</p>
             </div>
-            <div class="border-b border-gray-200 mb-8">
-                <p class="text-center text-lg text-gray-700 py-4 font-bold">
-                    <label>Generated Queue Number:</label> <span class="text-blue-600" id="generated-queue-number"> </span>
-                </p>
-            </div>
+
             <!-- Window Buttons -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 @for($i = 1; $i <= 4; $i++)
@@ -97,31 +93,24 @@
 @push('scripts')
 <script>
 let isGenerating = false;
+let refreshInterval = null;
+let lastDataTimestamp = 0;
 
 function generateQueue(windowNumber) {
-    // Prevent multiple clicks
     if (isGenerating) return;
 
     isGenerating = true;
     const btn = $(`#window-btn-${windowNumber}`);
 
-    // Disable all window buttons
     $('.window-btn').prop('disabled', true);
-
-    // Show loading state for clicked button
     btn.find('.btn-content').addClass('hidden');
     btn.find('.btn-loading').removeClass('hidden');
 
     $.post('/queue/generate', { window_number: windowNumber })
         .done(function(response) {
             showNotification('Queue generated: ' + response.queue.queue_number, 'success');
-            $('#generated-queue-number').text(response.queue.queue_number);
             refreshData();
-
-            // Reset button state after 1 second
-            setTimeout(function() {
-                resetButtons();
-            }, 1000);
+            setTimeout(resetButtons, 1000);
         })
         .fail(function(xhr) {
             showNotification('Error generating queue', 'error');
@@ -131,56 +120,58 @@ function generateQueue(windowNumber) {
 
 function resetButtons() {
     isGenerating = false;
-
-    // Re-enable all buttons
     $('.window-btn').prop('disabled', false);
-
-    // Hide loading, show content
     $('.btn-loading').addClass('hidden');
     $('.btn-content').removeClass('hidden');
 }
 
 function refreshData() {
-    // Refresh statistics
-    $.get('/api/queues/statistics').done(function(stats) {
-        $('.stat-waiting').text(stats.waiting);
-        $('.stat-serving').text(stats.serving);
-        $('.stat-completed').text(stats.completed);
-    });
+    // OPTIMIZED: Single API call for all data
+    $.get('/api/system/all-data')
+        .done(function(data) {
+            // Only update if data changed
+            if (data.timestamp === lastDataTimestamp) return;
+            lastDataTimestamp = data.timestamp;
 
-    // Refresh window stats
-    for (let i = 1; i <= 4; i++) {
-        $.get('/api/queues/window/' + i + '/statistics').done(function(stats) {
-            $(`.window-${i}-waiting`).text(stats.waiting);
-            $(`.window-${i}-serving`).text(stats.serving);
+            // Update statistics
+            $('.stat-waiting').text(data.statistics.waiting);
+            $('.stat-serving').text(data.statistics.serving);
+            $('.stat-completed').text(data.statistics.completed);
+
+            // Update window stats
+            for (let i = 1; i <= 4; i++) {
+                $(`.window-${i}-waiting`).text(data.window_stats[i].waiting);
+                $(`.window-${i}-serving`).text(data.window_stats[i].serving);
+            }
+
+            // Update recent queues
+            updateRecentQueues(data.recent_queues);
         });
-    }
+}
 
-    // Refresh recent queues
-    $.get('/api/queues/recent').done(function(queues) {
-        let html = '';
-        queues.forEach(function(queue) {
-            let statusClass = queue.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
-                            (queue.status.includes('substep') ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800');
-            let statusText = queue.status.replace('substep', 'Step ');
-            let time = new Date(queue.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+function updateRecentQueues(queues) {
+    let html = '';
+    queues.forEach(function(queue) {
+        let statusClass = queue.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
+                        (queue.status.includes('substep') ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800');
+        let statusText = queue.status.replace('substep', 'Step ');
+        let time = new Date(queue.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-            html += `
-                <div class="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
-                    <div>
-                        <div class="font-bold text-orange-600 text-xl">${queue.queue_number}</div>
-                        <div class="text-sm text-gray-500">${time}</div>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">
-                            ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}
-                        </span>
-                    </div>
+        html += `
+            <div class="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
+                <div>
+                    <div class="font-bold text-orange-600 text-xl">${queue.queue_number}</div>
+                    <div class="text-sm text-gray-500">${time}</div>
                 </div>
-            `;
-        });
-        $('#recent-queues').html(html);
+                <div class="text-right">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">
+                        ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}
+                    </span>
+                </div>
+            </div>
+        `;
     });
+    $('#recent-queues').html(html);
 }
 
 function showNotification(message, type) {
@@ -197,16 +188,21 @@ function showNotification(message, type) {
     `);
 
     $('body').append(notification);
-
-    setTimeout(() => {
-        notification.fadeOut(300, function() {
-            $(this).remove();
-        });
-    }, 3000);
+    setTimeout(() => notification.fadeOut(300, function() { $(this).remove(); }), 3000);
 }
 
-// Auto-refresh every 3 seconds
-setInterval(refreshData, 3000);
+// OPTIMIZED: Refresh every 5 seconds instead of 3
+refreshInterval = setInterval(refreshData, 5000);
+
+// Stop refresh when tab is hidden (saves resources)
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        clearInterval(refreshInterval);
+    } else {
+        refreshData();
+        refreshInterval = setInterval(refreshData, 5000);
+    }
+});
 </script>
 
 <style>
