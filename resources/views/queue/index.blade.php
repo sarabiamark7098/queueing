@@ -14,7 +14,11 @@
                 <h1 class="text-4xl font-bold text-gray-800 mb-2">Queue Generation</h1>
                 <p class="text-gray-600">Click a window to generate queue number instantly</p>
             </div>
-
+            <div class="border-b border-gray-200 mb-8">
+                <p class="text-center text-lg text-gray-700 py-4 font-bold">
+                    <label>Generated Queue Number:</label> <span class="text-blue-600" id="generated-queue-number"> </span>
+                </p>
+            </div>
             <!-- Window Buttons -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 @for($i = 1; $i <= 4; $i++)
