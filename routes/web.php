@@ -19,6 +19,8 @@ Route::get('/', function () {
 // Queue Generation
 Route::get('/queue', [QueueController::class, 'index'])->name('queue.index');
 Route::post('/queue/generate', [QueueController::class, 'generate'])->name('queue.generate');
+Route::post('/queue/window/{number}/update-prefix', [QueueController::class, 'updatePrefix'])->name('queue.updatePrefix');
+
 
 // Main Display Board
 Route::get('/display', [DisplayController::class, 'index'])->name('display.main');

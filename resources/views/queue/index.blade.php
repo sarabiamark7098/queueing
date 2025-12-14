@@ -14,36 +14,72 @@
                 <h1 class="text-4xl font-bold text-gray-800 mb-2">Queue Generation</h1>
                 <p class="text-gray-600">Click a window to generate queue number instantly</p>
             </div>
-            <div class="border-b border-gray-200 mb-8">
-                <p class="text-center text-lg text-gray-700 py-4 font-bold">
-                    <label>Generated Queue Number:</label> <span class="text-blue-600" id="generated-queue-number"> </span>
-                </p>
-            </div>
 
             <!-- Window Buttons -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 @for($i = 1; $i <= 4; $i++)
-                <button onclick="generateQueue({{ $i }})"
-                        id="window-btn-{{ $i }}"
-                        class="window-btn bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl p-8 transition-all transform hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                    <div class="btn-content">
-                        <div class="text-5xl font-bold mb-3">Window {{ $i }}</div>
-                        <div class="text-xl mb-4">Click to Generate</div>
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                            <div class="text-sm opacity-90">
-                                <span class="window-{{ $i }}-waiting">{{ $windowStats[$i]['waiting'] }}</span> waiting •
-                                <span class="window-{{ $i }}-serving">{{ $windowStats[$i]['serving'] }}</span> in process
+                <div class="space-y-3">
+                    <!-- Customize Prefix Section -->
+                    <div class="bg-gray-50 rounded-lg p-3 border-2 border-gray-200">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <label class="text-xs font-semibold text-gray-600">Custom Prefix (Optional):</label>
+                            <button onclick="togglePrefixEdit({{ $i }})" class="text-blue-600 hover:text-blue-700 text-xs font-semibold">
+                                ✏️ Edit
+                            </button>
+                        </div>
+                        <div id="prefix-display-{{ $i }}" class="text-sm font-mono font-bold text-gray-800">
+                            {{ $windowPrefixes[$i]['prefix'] }}-0001
+                        </div>
+                        <div id="prefix-edit-{{ $i }}" class="hidden space-y-2">
+                            <input type="text"
+                                   id="prefix-input-{{ $i }}"
+                                   value="{{ $windowPrefixes[$i]['custom_prefix'] }}"
+                                   placeholder="e.g., 11-6995 or ABC-123"
+                                   class="w-full px-3 py-2 border rounded text-sm"
+                                   maxlength="50">
+                            <div class="flex space-x-2">
+                                <button onclick="savePrefix({{ $i }})"
+                                        class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-3 rounded">
+                                    Save
+                                </button>
+                                <button onclick="clearPrefix({{ $i }})"
+                                        class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-3 rounded">
+                                    Reset Default
+                                </button>
+                                <button onclick="cancelPrefixEdit({{ $i }})"
+                                        class="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold py-1 px-3 rounded">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                Default: W{{ $i }}-0001 | Custom example: 11-6995-0001
                             </div>
                         </div>
                     </div>
-                    <div class="btn-loading hidden">
-                        <svg class="animate-spin h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <div class="text-xl font-semibold">Generating...</div>
-                    </div>
-                </button>
+
+                    <!-- Generate Button -->
+                    <button onclick="generateQueue({{ $i }})"
+                            id="window-btn-{{ $i }}"
+                            class="window-btn w-full bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl p-6 transition-all transform hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                        <div class="btn-content">
+                            <div class="text-4xl font-bold mb-2">Window {{ $i }}</div>
+                            <div class="text-lg mb-3">Click to Generate</div>
+                            <div class="bg-white bg-opacity-20 rounded-lg p-2">
+                                <div class="text-sm opacity-90">
+                                    <span class="window-{{ $i }}-waiting">{{ $windowStats[$i]['waiting'] }}</span> waiting •
+                                    <span class="window-{{ $i }}-serving">{{ $windowStats[$i]['serving'] }}</span> in process
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-loading hidden">
+                            <svg class="animate-spin h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <div class="text-xl font-semibold">Generating...</div>
+                        </div>
+                    </button>
+                </div>
                 @endfor
             </div>
 
@@ -81,9 +117,9 @@
                         <div class="text-right">
                             <span class="px-3 py-1 rounded-full text-xs font-semibold
                                 {{ $queue->status === 'waiting' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                {{ in_array($queue->status, ['substep1', 'substep2', 'substep3']) ? 'bg-blue-100 text-blue-800' : '' }}
+                                {{ in_array($queue->status, ['substep1', 'substep2', 'substep3', 'waiting_substep2', 'waiting_substep3']) ? 'bg-blue-100 text-blue-800' : '' }}
                                 {{ $queue->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}">
-                                {{ ucfirst(str_replace('substep', 'Step ', $queue->status)) }}
+                                {{ ucfirst(str_replace(['substep', 'waiting_'], ['Step ', 'Wait Step '], $queue->status)) }}
                             </span>
                         </div>
                     </div>
@@ -101,6 +137,57 @@ let isGenerating = false;
 let refreshInterval = null;
 let lastDataTimestamp = 0;
 
+// Prefix Management Functions
+function togglePrefixEdit(windowNumber) {
+    $(`#prefix-display-${windowNumber}`).addClass('hidden');
+    $(`#prefix-edit-${windowNumber}`).removeClass('hidden');
+}
+
+function cancelPrefixEdit(windowNumber) {
+    $(`#prefix-display-${windowNumber}`).removeClass('hidden');
+    $(`#prefix-edit-${windowNumber}`).addClass('hidden');
+}
+
+function savePrefix(windowNumber) {
+    const prefix = $(`#prefix-input-${windowNumber}`).val().trim();
+
+    // Validate prefix format
+    if (prefix && !/^[A-Za-z0-9\-]+$/.test(prefix)) {
+        showNotification('Invalid prefix format. Use only letters, numbers, and hyphens.', 'error');
+        return;
+    }
+
+    $.post(`/queue/window/${windowNumber}/update-prefix`, {
+        custom_prefix: prefix
+    })
+    .done(function(response) {
+        $(`#prefix-display-${windowNumber}`).text(response.prefix + '-0001');
+        cancelPrefixEdit(windowNumber);
+        showNotification('Prefix updated successfully!', 'success');
+    })
+    .fail(function(xhr) {
+        showNotification('Error updating prefix', 'error');
+    });
+}
+
+function clearPrefix(windowNumber) {
+    if (!confirm('Reset to default prefix (W' + windowNumber + ')?')) return;
+
+    $.post(`/queue/window/${windowNumber}/update-prefix`, {
+        custom_prefix: ''
+    })
+    .done(function(response) {
+        $(`#prefix-input-${windowNumber}`).val('');
+        $(`#prefix-display-${windowNumber}`).text(response.prefix + '-0001');
+        cancelPrefixEdit(windowNumber);
+        showNotification('Prefix reset to default!', 'success');
+    })
+    .fail(function(xhr) {
+        showNotification('Error resetting prefix', 'error');
+    });
+}
+
+// Queue Generation
 function generateQueue(windowNumber) {
     if (isGenerating) return;
 
@@ -114,7 +201,6 @@ function generateQueue(windowNumber) {
     $.post('/queue/generate', { window_number: windowNumber })
         .done(function(response) {
             showNotification('Queue generated: ' + response.queue.queue_number, 'success');
-            $('#generated-queue-number').text(response.queue.queue_number);
             refreshData();
             setTimeout(resetButtons, 1000);
         })
@@ -132,25 +218,20 @@ function resetButtons() {
 }
 
 function refreshData() {
-    // OPTIMIZED: Single API call for all data
     $.get('/api/system/all-data')
         .done(function(data) {
-            // Only update if data changed
             if (data.timestamp === lastDataTimestamp) return;
             lastDataTimestamp = data.timestamp;
 
-            // Update statistics
             $('.stat-waiting').text(data.statistics.waiting);
             $('.stat-serving').text(data.statistics.serving);
             $('.stat-completed').text(data.statistics.completed);
 
-            // Update window stats
             for (let i = 1; i <= 4; i++) {
                 $(`.window-${i}-waiting`).text(data.window_stats[i].waiting);
                 $(`.window-${i}-serving`).text(data.window_stats[i].serving);
             }
 
-            // Update recent queues
             updateRecentQueues(data.recent_queues);
         });
 }
@@ -159,8 +240,8 @@ function updateRecentQueues(queues) {
     let html = '';
     queues.forEach(function(queue) {
         let statusClass = queue.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
-                        (queue.status.includes('substep') ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800');
-        let statusText = queue.status.replace('substep', 'Step ');
+                        (queue.status.includes('substep') || queue.status.includes('waiting_')) ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+        let statusText = queue.status.replace('substep', 'Step ').replace('waiting_', 'Wait Step ');
         let time = new Date(queue.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
         html += `
@@ -197,10 +278,8 @@ function showNotification(message, type) {
     setTimeout(() => notification.fadeOut(300, function() { $(this).remove(); }), 3000);
 }
 
-// OPTIMIZED: Refresh every 5 seconds instead of 3
 refreshInterval = setInterval(refreshData, 5000);
 
-// Stop refresh when tab is hidden (saves resources)
 document.addEventListener('visibilitychange', function() {
     if (document.hidden) {
         clearInterval(refreshInterval);

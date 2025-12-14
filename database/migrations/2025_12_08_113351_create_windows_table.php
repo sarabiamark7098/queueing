@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('windows', function (Blueprint $table) {
             $table->id();
             $table->integer('window_number')->unique();
+            $table->string('custom_prefix')->nullable();
+            $table->boolean('use_custom_prefix')->default(false);
             $table->unsignedBigInteger('substep1_queue_id')->nullable();
             $table->unsignedBigInteger('substep2_queue_id')->nullable();
             $table->unsignedBigInteger('substep3_queue_id')->nullable();
             $table->integer('last_queue_number')->default(0);
+
             $table->timestamps();
 
             $table->index('window_number');

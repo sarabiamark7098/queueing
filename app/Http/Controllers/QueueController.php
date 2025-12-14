@@ -14,11 +14,39 @@ class QueueController extends Controller
         $recentQueues = Queue::getRecentQueues(10);
 
         $windowStats = [];
+        $windowPrefixes = [];
         for ($i = 1; $i <= 4; $i++) {
+            $window = Window::where('window_number', $i)->first();
             $windowStats[$i] = Queue::getWindowStatistics($i);
+            $windowPrefixes[$i] = [
+                'prefix' => $window->getQueuePrefix(),
+                'custom_prefix' => $window->custom_prefix,
+                'use_custom' => $window->use_custom_prefix
+            ];
         }
 
-        return view('queue.index', compact('statistics', 'recentQueues', 'windowStats'));
+        return view('queue.index', compact('statistics', 'recentQueues', 'windowStats', 'windowPrefixes'));
+    }
+
+    public function updatePrefix(Request $request, $windowNumber)
+    {
+        $request->validate([
+            'custom_prefix' => 'nullable|string|max:50|regex:/^[A-Za-z0-9\-]+$/'
+        ]);
+
+        $window = Window::where('window_number', $windowNumber)->first();
+
+        if (!$window) {
+            return response()->json(['error' => 'Window not found'], 404);
+        }
+
+        $window->updateCustomPrefix($request->custom_prefix);
+
+        return response()->json([
+            'success' => true,
+            'prefix' => $window->getQueuePrefix(),
+            'use_custom' => $window->use_custom_prefix
+        ]);
     }
 
     public function generate(Request $request)

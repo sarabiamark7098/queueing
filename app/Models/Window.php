@@ -11,11 +11,37 @@ class Window extends Model
 
     protected $fillable = [
         'window_number',
+        'custom_prefix',
+        'use_custom_prefix',
         'substep1_queue_id',
         'substep2_queue_id',
         'substep3_queue_id',
         'last_queue_number'
     ];
+
+    public function getQueuePrefix(): string
+    {
+        if ($this->use_custom_prefix && $this->custom_prefix) {
+            return $this->custom_prefix;
+        }
+
+        return 'W' . $this->window_number;
+    }
+    
+    public function updateCustomPrefix(?string $prefix): void
+    {
+        if ($prefix && trim($prefix) !== '') {
+            $this->update([
+                'custom_prefix' => trim($prefix),
+                'use_custom_prefix' => true
+            ]);
+        } else {
+            $this->update([
+                'custom_prefix' => null,
+                'use_custom_prefix' => false
+            ]);
+        }
+    }
 
     public function substep1Queue()
     {

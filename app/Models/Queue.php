@@ -34,7 +34,9 @@ class Queue extends Model
 
         $window->update(['last_queue_number' => $sequence]);
 
-        return 'W' . $windowNumber . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        $prefix = $window->getQueuePrefix();
+
+        return $prefix . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
     public static function getWaitingForWindow(int $windowNumber)
