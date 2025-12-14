@@ -11,64 +11,120 @@
 
         <!-- Windows Grid -->
         <div class="grid grid-cols-2 gap-4 mb-6">
-            @foreach($windows as $window)
-            <div class="bg-white rounded-2xl shadow-2xl p-6" id="window-{{ $window->window_number }}">
-                <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">Window {{ $window->window_number }}</h2>
+        @php
+        $windowBgColors = [
+            1 => 'bg-green-300',
+            2 => 'bg-red-300',
+            3 => 'bg-yellow-300',
+            4 => 'bg-blue-300',
+        ];
+        $windowColors = [
+            1 => [
+                'bg' => 'bg-green-50',
+                'border' => 'border-green-200',
+                'text' => 'text-green-800',
+                'value' => 'text-green-600',
+                'status' => 'text-green-500',
+            ],
+            2 => [
+                'bg' => 'bg-red-50',
+                'border' => 'border-red-200',
+                'text' => 'text-red-800',
+                'value' => 'text-red-600',
+                'status' => 'text-red-500',
+            ],
+            3 => [
+                'bg' => 'bg-yellow-50',
+                'border' => 'border-yellow-200',
+                'text' => 'text-yellow-800',
+                'value' => 'text-yellow-600',
+                'status' => 'text-yellow-500',
+            ],
+            4 => [
+                'bg' => 'bg-blue-50',
+                'border' => 'border-blue-200',
+                'text' => 'text-blue-800',
+                'value' => 'text-blue-600',
+                'status' => 'text-blue-500',
+            ],
+        ];
+        @endphp
+        @foreach($windows as $window)
+            @php
+            $color = $windowColors[$window->window_number] ?? $windowColors[1];
+            @endphp
+
+            @php
+$bgColor = $windowBgColors[$window->window_number] ?? 'bg-gray-100';
+@endphp
+
+<div
+    class="{{ $bgColor }} rounded-2xl shadow-2xl p-6"
+    id="window-{{ $window->window_number }}"
+>
+                <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">
+                    Window {{ $window->window_number }}
+                </h2>
 
                 <div class="grid grid-cols-3 gap-3">
-                    <!-- Step 1 -->
-                    <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
-                        <div class="text-xs font-bold text-blue-800 text-center mb-2">STEP 1</div>
-                        <div class="substep1-content">
-                            @if($window->substep1Queue)
+
+                    <!-- STEP 1 -->
+                    <div class="{{ $color['bg'] }} rounded-xl p-4 border-2 {{ $color['border'] }}">
+                        <div class="text-xs font-bold {{ $color['text'] }} text-center mb-2">STEP 1</div>
+
+                        @if($window->substep1Queue)
                             <div class="text-center">
-                                <div class="text-2xl font-bold text-blue-600">{{ $window->substep1Queue->queue_number }}</div>
-                                <div class="text-xs text-blue-500 mt-1">In Progress</div>
+                                <div class="text-2xl font-bold {{ $color['value'] }}">
+                                    {{ $window->substep1Queue->queue_number }}
+                                </div>
+                                <div class="text-xs {{ $color['status'] }} mt-1">In Progress</div>
                             </div>
-                            @else
+                        @else
                             <div class="text-center text-gray-400 py-2">
                                 <div class="text-sm">Empty</div>
                             </div>
-                            @endif
-                        </div>
+                        @endif
                     </div>
 
-                    <!-- Step 2 -->
-                    <div class="bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
-                        <div class="text-xs font-bold text-purple-800 text-center mb-2">STEP 2</div>
-                        <div class="substep2-content">
-                            @if($window->substep2Queue)
+                    <!-- STEP 2 -->
+                    <div class="{{ $color['bg'] }} rounded-xl p-4 border-2 {{ $color['border'] }}">
+                        <div class="text-xs font-bold {{ $color['text'] }} text-center mb-2">STEP 2</div>
+
+                        @if($window->substep2Queue)
                             <div class="text-center">
-                                <div class="text-2xl font-bold text-purple-600">{{ $window->substep2Queue->queue_number }}</div>
-                                <div class="text-xs text-purple-500 mt-1">In Progress</div>
+                                <div class="text-2xl font-bold {{ $color['value'] }}">
+                                    {{ $window->substep2Queue->queue_number }}
+                                </div>
+                                <div class="text-xs {{ $color['status'] }} mt-1">In Progress</div>
                             </div>
-                            @else
+                        @else
                             <div class="text-center text-gray-400 py-2">
                                 <div class="text-sm">Empty</div>
                             </div>
-                            @endif
-                        </div>
+                        @endif
                     </div>
 
-                    <!-- Step 3 -->
-                    <div class="bg-green-50 rounded-xl p-4 border-2 border-green-200">
-                        <div class="text-xs font-bold text-green-800 text-center mb-2">STEP 3</div>
-                        <div class="substep3-content">
-                            @if($window->substep3Queue)
+                    <!-- STEP 3 -->
+                    <div class="{{ $color['bg'] }} rounded-xl p-4 border-2 {{ $color['border'] }}">
+                        <div class="text-xs font-bold {{ $color['text'] }} text-center mb-2">STEP 3</div>
+
+                        @if($window->substep3Queue)
                             <div class="text-center">
-                                <div class="text-2xl font-bold text-green-600">{{ $window->substep3Queue->queue_number }}</div>
-                                <div class="text-xs text-green-500 mt-1">In Progress</div>
+                                <div class="text-2xl font-bold {{ $color['value'] }}">
+                                    {{ $window->substep3Queue->queue_number }}
+                                </div>
+                                <div class="text-xs {{ $color['status'] }} mt-1">In Progress</div>
                             </div>
-                            @else
+                        @else
                             <div class="text-center text-gray-400 py-2">
                                 <div class="text-sm">Empty</div>
                             </div>
-                            @endif
-                        </div>
+                        @endif
                     </div>
+
                 </div>
             </div>
-            @endforeach
+        @endforeach
         </div>
 
         <!-- Statistics -->
