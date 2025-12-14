@@ -45,9 +45,6 @@ class Queue extends Model
                    ->get();
     }
 
-    /**
-     * Get queues waiting for substep 2
-     */
     public static function getWaitingForSubstep2(int $windowNumber)
     {
         return self::where('window_number', $windowNumber)
@@ -56,9 +53,6 @@ class Queue extends Model
                 ->get();
     }
 
-    /**
-     * Get queues waiting for substep 3
-     */
     public static function getWaitingForSubstep3(int $windowNumber)
     {
         return self::where('window_number', $windowNumber)

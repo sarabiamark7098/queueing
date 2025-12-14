@@ -90,18 +90,16 @@ class Window extends Model
     public function moveToSubstep2(): bool
     {
         if (!$this->substep1_queue_id) {
-            return false; // Nothing in Step 1
+            return false;
         }
 
         $queue = Queue::find($this->substep1_queue_id);
 
-        // Move to waiting for substep 2 immediately
         $queue->update([
             'status' => 'waiting_substep2',
             'current_substep' => null
         ]);
 
-        // Clear Step 1
         $this->update(['substep1_queue_id' => null]);
 
         return true;
@@ -110,7 +108,7 @@ class Window extends Model
     public function callNextToSubstep2(): ?Queue
     {
         if ($this->substep2_queue_id) {
-            return null; // Substep 2 is occupied
+            return null;
         }
 
         $nextQueue = Queue::where('window_number', $this->window_number)
@@ -135,7 +133,7 @@ class Window extends Model
     public function callSpecificToSubstep2(int $queueId): ?Queue
     {
         if ($this->substep2_queue_id) {
-            return null; // Substep 2 is occupied
+            return null;
         }
 
         $queue = Queue::where('id', $queueId)
@@ -160,18 +158,16 @@ class Window extends Model
     public function moveToSubstep3(): bool
     {
         if (!$this->substep2_queue_id) {
-            return false; // Nothing in Step 2
+            return false;
         }
 
         $queue = Queue::find($this->substep2_queue_id);
 
-        // Move to waiting for substep 3 immediately
         $queue->update([
             'status' => 'waiting_substep3',
             'current_substep' => null
         ]);
 
-        // Clear Step 2
         $this->update(['substep2_queue_id' => null]);
 
         return true;
@@ -180,7 +176,7 @@ class Window extends Model
     public function callNextToSubstep3(): ?Queue
     {
         if ($this->substep3_queue_id) {
-            return null; // Substep 3 is occupied
+            return null;
         }
 
         $nextQueue = Queue::where('window_number', $this->window_number)
