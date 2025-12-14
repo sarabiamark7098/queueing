@@ -19,7 +19,10 @@ Route::get('/', function () {
 // Queue Generation
 Route::get('/queue', [QueueController::class, 'index'])->name('queue.index');
 Route::post('/queue/generate', [QueueController::class, 'generate'])->name('queue.generate');
+Route::post('/queue/generate-manual', [QueueController::class, 'generateManual'])->name('queue.generateManual');
+Route::post('/queue/check-queue-number', [QueueController::class, 'checkQueueNumber'])->name('queue.checkQueueNumber');
 Route::post('/queue/window/{number}/update-prefix', [QueueController::class, 'updatePrefix'])->name('queue.updatePrefix');
+Route::post('/queue/window/{number}/check-prefix', [QueueController::class, 'checkPrefix'])->name('queue.checkPrefix');
 
 
 // Main Display Board

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Queue;
+use App\Models\QueueSequence;
 use App\Models\Window;
 use Illuminate\Http\Request;
 
@@ -13,8 +14,11 @@ class QueueController extends Controller
         $statistics = Queue::getOverallStatistics();
         $recentQueues = Queue::getRecentQueues(10);
 
+        // Get waiting counts per window with custom prefixes
         $windowStats = [];
         $windowPrefixes = [];
+        $prefixesInUse = QueueSequence::getAllPrefixesInUse();
+
         for ($i = 1; $i <= 4; $i++) {
             $window = Window::where('window_number', $i)->first();
             $windowStats[$i] = Queue::getWindowStatistics($i);
@@ -25,7 +29,45 @@ class QueueController extends Controller
             ];
         }
 
-        return view('queue.index', compact('statistics', 'recentQueues', 'windowStats', 'windowPrefixes'));
+        return view('queue.index', compact('statistics', 'recentQueues', 'windowStats', 'windowPrefixes', 'prefixesInUse'));
+    }
+
+    public function generateManual(Request $request)
+    {
+        $request->validate([
+            'window_number' => 'required|integer|between:1,4',
+            'queue_number' => 'required|string|max:50',
+            'mode' => 'required|in:prefix,special'
+        ]);
+
+        $result = Queue::createManualQueue(
+            $request->window_number,
+            $request->queue_number,
+            $request->mode
+        );
+
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error']], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'queue' => $result['queue'],
+            'message' => $result['message'],
+            'prefix' => $result['prefix'] ?? null
+        ]);
+    }
+
+    public function checkQueueNumber(Request $request)
+    {
+        $queueNumber = strtoupper(trim($request->input('queue_number')));
+
+        $exists = Queue::where('queue_number', $queueNumber)->exists();
+
+        return response()->json([
+            'available' => !$exists,
+            'queue_number' => $queueNumber
+        ]);
     }
 
     public function updatePrefix(Request $request, $windowNumber)
@@ -40,12 +82,36 @@ class QueueController extends Controller
             return response()->json(['error' => 'Window not found'], 404);
         }
 
-        $window->updateCustomPrefix($request->custom_prefix);
+        $result = $window->updateCustomPrefix($request->custom_prefix);
+
+        if (!$result['success']) {
+            return response()->json([
+                'error' => $result['error'],
+                'conflict_window' => $result['conflict_window'] ?? null
+            ], 400);
+        }
 
         return response()->json([
             'success' => true,
             'prefix' => $window->getQueuePrefix(),
-            'use_custom' => $window->use_custom_prefix
+            'use_custom' => $window->use_custom_prefix,
+            'message' => $result['message']
+        ]);
+    }
+
+    public function checkPrefix(Request $request, $windowNumber)
+    {
+        $prefix = $request->input('prefix');
+
+        if (!$prefix) {
+            return response()->json(['available' => true]);
+        }
+
+        $isUsed = QueueSequence::isPrefixInUse($prefix, $windowNumber);
+
+        return response()->json([
+            'available' => !$isUsed,
+            'prefix' => $prefix
         ]);
     }
 

@@ -15,8 +15,7 @@ class Window extends Model
         'use_custom_prefix',
         'substep1_queue_id',
         'substep2_queue_id',
-        'substep3_queue_id',
-        'last_queue_number'
+        'substep3_queue_id'
     ];
 
     public function getQueuePrefix(): string
@@ -27,19 +26,46 @@ class Window extends Model
 
         return 'W' . $this->window_number;
     }
-    
-    public function updateCustomPrefix(?string $prefix): void
+
+    public function updateCustomPrefix(?string $prefix): array
     {
         if ($prefix && trim($prefix) !== '') {
+            $cleanPrefix = trim($prefix);
+
+            // Check if prefix is already used by another window
+            $conflictWindow = Window::where('custom_prefix', $cleanPrefix)
+                                ->where('use_custom_prefix', true)
+                                ->where('window_number', '!=', $this->window_number)
+                                ->first();
+
+            if ($conflictWindow) {
+                return [
+                    'success' => false,
+                    'error' => "Prefix '{$cleanPrefix}' is already used by Window {$conflictWindow->window_number}",
+                    'conflict_window' => $conflictWindow->window_number
+                ];
+            }
+
             $this->update([
-                'custom_prefix' => trim($prefix),
+                'custom_prefix' => $cleanPrefix,
                 'use_custom_prefix' => true
             ]);
+
+            return [
+                'success' => true,
+                'message' => 'Prefix updated successfully'
+            ];
         } else {
+            // Reset to default
             $this->update([
                 'custom_prefix' => null,
                 'use_custom_prefix' => false
             ]);
+
+            return [
+                'success' => true,
+                'message' => 'Prefix reset to default'
+            ];
         }
     }
 
