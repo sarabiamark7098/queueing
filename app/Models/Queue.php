@@ -45,20 +45,49 @@ class Queue extends Model
                    ->get();
     }
 
-    public static function getWindowStatistics(int $windowNumber): array
+    /**
+     * Get queues waiting for substep 2
+     */
+    public static function getWaitingForSubstep2(int $windowNumber)
+    {
+        return self::where('window_number', $windowNumber)
+                ->where('status', 'waiting_substep2')
+                ->orderBy('created_at', 'asc')
+                ->get();
+    }
+
+    /**
+     * Get queues waiting for substep 3
+     */
+    public static function getWaitingForSubstep3(int $windowNumber)
+    {
+        return self::where('window_number', $windowNumber)
+                ->where('status', 'waiting_substep3')
+                ->orderBy('created_at', 'asc')
+                ->get();
+    }
+
+        public static function getWindowStatistics(int $windowNumber): array
     {
         return [
             'waiting' => self::where('window_number', $windowNumber)
                             ->where('status', 'waiting')
                             ->count(),
+            'waiting_substep2' => self::where('window_number', $windowNumber)
+                                    ->where('status', 'waiting_substep2')
+                                    ->count(),
+            'waiting_substep3' => self::where('window_number', $windowNumber)
+                                    ->where('status', 'waiting_substep3')
+                                    ->count(),
             'serving' => self::where('window_number', $windowNumber)
                             ->whereIn('status', ['substep1', 'substep2', 'substep3'])
                             ->count(),
             'completed' => self::where('window_number', $windowNumber)
-                              ->where('status', 'completed')
-                              ->count(),
+                            ->where('status', 'completed')
+                            ->count(),
         ];
     }
+
 
     public static function getOverallStatistics(): array
     {
