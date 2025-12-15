@@ -23,9 +23,17 @@
 <!-- Window Buttons -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 @for($i = 1; $i <= 4; $i++)
-                <button onclick="generateQueue({{ $i }})"
-                        id="window-btn-{{ $i }}"
-                        class="window-btn bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl p-8 transition-all transform hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                <button
+                    onclick="generateQueue({{ $i }})"
+                    id="window-btn-{{ $i }}"
+                    class="window-btn
+                        {{ $i == 1 ? 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : '' }}
+                        {{ $i == 2 ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' : '' }}
+                        {{ $i == 3 ? 'bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600' : '' }}
+                        {{ $i == 4 ? 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : '' }}
+                        text-white rounded-2xl p-8 transition-all transform hover:scale-105 shadow-xl
+                        disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
                     <div class="btn-content">
                         <div class="text-5xl font-bold mb-3">Window {{ $i }}</div>
                         <div class="text-xl mb-4">Click to Generate</div>
@@ -218,5 +226,6 @@ document.addEventListener('visibilitychange', function() {
 .animate-spin {
     animation: spin 1s linear infinite;
 }
+
 </style>
 @endpush
