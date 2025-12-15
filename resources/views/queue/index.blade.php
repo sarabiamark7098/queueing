@@ -20,7 +20,7 @@
                 </p>
             </div>
 
-            <!-- Window Buttons -->
+<!-- Window Buttons -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 @for($i = 1; $i <= 4; $i++)
                 <button onclick="generateQueue({{ $i }})"
