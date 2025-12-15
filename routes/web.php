@@ -32,7 +32,10 @@ Route::get('/window/{number}/display', [WindowController::class, 'display'])->na
 // Window Actions
 Route::post('/window/{number}/call-next', [WindowController::class, 'callNext'])->name('window.callNext');
 Route::post('/window/{number}/call-specific', [WindowController::class, 'callSpecific'])->name('window.callSpecific');
+Route::post('/window/{number}/call-next-substep2', [WindowController::class, 'callNextToSubstep2'])->name('window.callNextToSubstep2');
+Route::post('/window/{number}/call-specific-substep2', [WindowController::class, 'callSpecificToSubstep2'])->name('window.callSpecificToSubstep2');
 Route::post('/window/{number}/move-to-substep2', [WindowController::class, 'moveToSubstep2'])->name('window.moveToSubstep2');
+Route::post('/window/{number}/call-next-substep3', [WindowController::class, 'callNextToSubstep3'])->name('window.callNextToSubstep3');
 Route::post('/window/{number}/move-to-substep3', [WindowController::class, 'moveToSubstep3'])->name('window.moveToSubstep3');
 Route::post('/window/{number}/complete-substep3', [WindowController::class, 'completeSubstep3'])->name('window.completeSubstep3');
 

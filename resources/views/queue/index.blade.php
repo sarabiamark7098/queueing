@@ -19,7 +19,8 @@
                     <label>Generated Queue Number:</label> <span class="text-blue-600" id="generated-queue-number"> </span>
                 </p>
             </div>
-            <!-- Window Buttons -->
+
+<!-- Window Buttons -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 @for($i = 1; $i <= 4; $i++)
                 <button onclick="generateQueue({{ $i }})"
@@ -113,6 +114,7 @@ function generateQueue(windowNumber) {
     $.post('/queue/generate', { window_number: windowNumber })
         .done(function(response) {
             showNotification('Queue generated: ' + response.queue.queue_number, 'success');
+            $('#generated-queue-number').text(response.queue.queue_number);
             refreshData();
             setTimeout(resetButtons, 1000);
         })
