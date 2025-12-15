@@ -19,6 +19,9 @@ Route::get('/', function () {
 // Queue Generation
 Route::get('/queue', [QueueController::class, 'index'])->name('queue.index');
 Route::post('/queue/generate', [QueueController::class, 'generate'])->name('queue.generate');
+Route::post('/queue/generate-manual', [QueueController::class, 'generateManual'])->name('queue.generateManual');
+Route::post('/queue/check-queue-number', [QueueController::class, 'checkQueueNumber'])->name('queue.checkQueueNumber');
+
 
 // Main Display Board
 Route::get('/display', [DisplayController::class, 'index'])->name('display.main');

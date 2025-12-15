@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('window_number');
             $table->enum('status', ['waiting', 'substep1', 'waiting_substep2', 'substep2', 'waiting_substep3', 'substep3', 'completed'])->default('waiting');
             $table->integer('current_substep')->nullable();
+            $table->boolean('is_manual')->default(false);
             $table->timestamps();
 
             $table->index(['window_number', 'status']);

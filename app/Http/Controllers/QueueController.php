@@ -32,12 +32,48 @@ class QueueController extends Controller
         $queue = Queue::create([
             'queue_number' => $queueNumber,
             'window_number' => $request->window_number,
-            'status' => 'waiting'
+            'status' => 'waiting',
+            'is_manual' => false
         ]);
 
         return response()->json([
             'success' => true,
             'queue' => $queue
+        ]);
+    }
+
+    public function generateManual(Request $request)
+    {
+        $request->validate([
+            'window_number' => 'required|integer|between:1,4',
+            'queue_number' => 'required|string|max:50'
+        ]);
+
+        $result = Queue::createManualQueue(
+            $request->window_number,
+            $request->queue_number
+        );
+
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error']], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'queue' => $result['queue'],
+            'message' => $result['message']
+        ]);
+    }
+
+    public function checkQueueNumber(Request $request)
+    {
+        $queueNumber = strtoupper(trim($request->input('queue_number')));
+
+        $exists = Queue::where('queue_number', $queueNumber)->exists();
+
+        return response()->json([
+            'available' => !$exists,
+            'queue_number' => $queueNumber
         ]);
     }
 

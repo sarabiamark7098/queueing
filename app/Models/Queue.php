@@ -13,7 +13,9 @@ class Queue extends Model
         'queue_number',
         'window_number',
         'status',
-        'current_substep'
+        'current_substep',
+        'is_special',
+        'is_manual'
     ];
 
     protected $casts = [
@@ -30,11 +32,59 @@ class Queue extends Model
     {
         $window = Window::where('window_number', $windowNumber)->first();
 
+        // Get next sequence number for this window
         $sequence = $window->last_queue_number + 1;
 
+        // Update window's last queue number
         $window->update(['last_queue_number' => $sequence]);
 
-        return 'W' . $windowNumber . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        // Format: W1-0001, W2-0001, etc.
+        $queueNumber = 'W' . $windowNumber . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        // Double-check uniqueness
+        while (self::where('queue_number', $queueNumber)->exists()) {
+            $sequence++;
+            $window->update(['last_queue_number' => $sequence]);
+            $queueNumber = 'W' . $windowNumber . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        }
+
+        return $queueNumber;
+    }
+
+    public static function createManualQueue(int $windowNumber, string $queueNumber): array
+    {
+        // Clean and uppercase the input
+        $queueNumber = strtoupper(trim($queueNumber));
+
+        // Check if queue number already exists
+        if (self::where('queue_number', $queueNumber)->exists()) {
+            return [
+                'success' => false,
+                'error' => "Queue number '{$queueNumber}' already exists"
+            ];
+        }
+
+        // Validate format (allow letters, numbers, hyphens)
+        if (!preg_match('/^[A-Z0-9\-]+$/', $queueNumber)) {
+            return [
+                'success' => false,
+                'error' => 'Invalid format. Use only letters, numbers, and hyphens'
+            ];
+        }
+
+        // Create the manual queue
+        $queue = self::create([
+            'queue_number' => $queueNumber,
+            'window_number' => $windowNumber,
+            'status' => 'waiting',
+            'is_manual' => true
+        ]);
+
+        return [
+            'success' => true,
+            'queue' => $queue,
+            'message' => 'Manual queue created successfully'
+        ];
     }
 
     public static function getWaitingForWindow(int $windowNumber)
