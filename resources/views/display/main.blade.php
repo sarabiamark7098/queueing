@@ -13,39 +13,39 @@
         <div class="grid grid-cols-2 gap-4 mb-6">
         @php
         $windowBgColors = [
-            1 => 'bg-green-300',
+            1 => 'bg-blue-300',
             2 => 'bg-red-300',
             3 => 'bg-yellow-300',
-            4 => 'bg-blue-300',
+            4 => 'bg-orange-300',
         ];
         $windowColors = [
             1 => [
-                'bg' => 'bg-green-50',
-                'border' => 'border-green-200',
-                'text' => 'text-green-800',
-                'value' => 'text-green-600',
-                'status' => 'text-green-500',
+                'bg' => 'bg-blue-50',
+                'border' => 'border-blue-200',
+                'text' => 'text-grey-800',
+                'value' => 'text-blue-600',
+                'status' => 'text-blue-500',
             ],
             2 => [
                 'bg' => 'bg-red-50',
                 'border' => 'border-red-200',
-                'text' => 'text-red-800',
+                'text' => 'text-grey-800',
                 'value' => 'text-red-600',
                 'status' => 'text-red-500',
             ],
             3 => [
                 'bg' => 'bg-yellow-50',
                 'border' => 'border-yellow-200',
-                'text' => 'text-yellow-800',
+                'text' => 'text-grey-800',
                 'value' => 'text-yellow-600',
                 'status' => 'text-yellow-500',
             ],
             4 => [
-                'bg' => 'bg-blue-50',
-                'border' => 'border-blue-200',
-                'text' => 'text-blue-800',
-                'value' => 'text-blue-600',
-                'status' => 'text-blue-500',
+                'bg' => 'bg-orange-50',
+                'border' => 'border-orange-200',
+                'text' => 'text-grey-800',
+                'value' => 'text-orange-600',
+                'status' => 'text-orange-500',
             ],
         ];
         @endphp
@@ -55,13 +55,34 @@
             @endphp
 
             @php
-$bgColor = $windowBgColors[$window->window_number] ?? 'bg-gray-100';
-@endphp
+            $bgColor = $windowBgColors[$window->window_number] ?? 'bg-gray-100';
+            @endphp
 
-<div
-    class="{{ $bgColor }} rounded-2xl shadow-2xl p-6"
-    id="window-{{ $window->window_number }}"
->
+            @php
+                $formatQueue = function ($queueNumber, $windowNumber) {
+                    $prefixMap = [
+                        1 => 'COS',
+                        2 => 'COS',
+                        3 => 'COS',
+                        4 => 'JO',
+                    ];
+
+                    if (isset($prefixMap[$windowNumber])) {
+                        return preg_replace(
+                            '/^W' . $windowNumber . '-/',
+                            $prefixMap[$windowNumber] . '-',
+                            $queueNumber
+                        );
+                    }
+
+                    return $queueNumber;
+                };
+            @endphp
+
+            <div
+                class="{{ $bgColor }} rounded-2xl shadow-2xl p-6"
+                id="window-{{ $window->window_number }}"
+            >
                 <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">
                     Window {{ $window->window_number }}
                 </h2>
@@ -75,7 +96,7 @@ $bgColor = $windowBgColors[$window->window_number] ?? 'bg-gray-100';
                         @if($window->substep1Queue)
                             <div class="text-center">
                                 <div class="text-2xl font-bold {{ $color['value'] }}">
-                                    {{ $window->substep1Queue->queue_number }}
+                                    {{ $formatQueue($window->substep1Queue->queue_number, $window->window_number) }}
                                 </div>
                                 <div class="text-xs {{ $color['status'] }} mt-1">In Progress</div>
                             </div>
@@ -93,7 +114,7 @@ $bgColor = $windowBgColors[$window->window_number] ?? 'bg-gray-100';
                         @if($window->substep2Queue)
                             <div class="text-center">
                                 <div class="text-2xl font-bold {{ $color['value'] }}">
-                                    {{ $window->substep2Queue->queue_number }}
+                                    {{ $formatQueue($window->substep2Queue->queue_number, $window->window_number) }}
                                 </div>
                                 <div class="text-xs {{ $color['status'] }} mt-1">In Progress</div>
                             </div>
@@ -111,7 +132,7 @@ $bgColor = $windowBgColors[$window->window_number] ?? 'bg-gray-100';
                         @if($window->substep3Queue)
                             <div class="text-center">
                                 <div class="text-2xl font-bold {{ $color['value'] }}">
-                                    {{ $window->substep3Queue->queue_number }}
+                                    {{ $formatQueue($window->substep3Queue->queue_number, $window->window_number) }}
                                 </div>
                                 <div class="text-xs {{ $color['status'] }} mt-1">In Progress</div>
                             </div>

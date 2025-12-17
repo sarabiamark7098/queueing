@@ -214,6 +214,19 @@
     let lastDataHash = '';
     let currentModalStep = 1;
 
+    function formatQueueNumber(queueNumber, windowNumber) {
+        const prefixMap = {
+            1: 'COS',
+            2: 'COS',
+            3: 'COS',
+            4: 'JO'
+        };
+
+        if (!queueNumber) return '';
+        const prefix = prefixMap[windowNumber] ?? `W${windowNumber}`;
+        return queueNumber.replace(/^W\d+-/, prefix + '-');
+    }
+
     // Step 1 Functions
     function callNext() {
         $('#btn-call-next').prop('disabled', true);
@@ -360,33 +373,33 @@
 
                 $('#modal-queue-list').html(html);
             });
-    }
+        }
 
-    function closeSelectModal() {
-        $('#selectModal').addClass('hidden');
-    }
+        function closeSelectModal() {
+            $('#selectModal').addClass('hidden');
+        }
 
-    function callSpecific(queueId, step) {
-        closeSelectModal();
-        showNotification('Calling queue...', 'info');
-        const endpoint = step === 1 ?
-            `/window/${windowNumber}/call-specific` :
-            `/window/${windowNumber}/call-specific-substep2`;
+        function callSpecific(queueId, step) {
+            closeSelectModal();
+            showNotification('Calling queue...', 'info');
+            const endpoint = step === 1 ?
+                `/window/${windowNumber}/call-specific` :
+                `/window/${windowNumber}/call-specific-substep2`;
 
-        $.post(endpoint, {
-                queue_id: queueId
-            })
-            .done(function() {
-                showNotification(`Queue called to Step ${step} successfully`, 'success');
-                refreshWindowData();
-            })
-            .fail(function(xhr) {
-                showNotification(xhr.responseJSON?.error || 'Error calling queue', 'error');
-            });
-    }
+            $.post(endpoint, {
+                    queue_id: queueId
+                })
+                .done(function() {
+                    showNotification(`Queue called to Step ${step} successfully`, 'success');
+                    refreshWindowData();
+                })
+                .fail(function(xhr) {
+                    showNotification(xhr.responseJSON?.error || 'Error calling queue', 'error');
+                });
+        }
 
-    function refreshWindowData() {
-        $.get(`/api/window/${windowNumber}/data`)
+        function refreshWindowData() {
+            $.get(`/api/window/${windowNumber}/data`)
             .done(function(data) {
                 const dataHash = JSON.stringify(data);
                 if (dataHash === lastDataHash) return;
@@ -396,81 +409,60 @@
             });
         }
 
+
         function updateSubstepDisplay(data) {
-            // Update substep 1
             $('#substep1-content').html(data.window.substep1_queue ? `
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-blue-600 mb-4">${data.window.substep1_queue.queue_number}</div>
-                    <button onclick="moveToSubstep2()"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
-                        <span>Send to Step 2 Queue</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
+                    <div class="text-4xl font-bold text-blue-700 mb-4">${formatQueueNumber(data.window.substep1_queue.queue_number, windowNumber)}</div>
+                    <button onclick="moveToSubstep2()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Send to Step 2 Queue
                     </button>
                 </div>
-            ` : `
-                <div class="text-center text-gray-400 py-8">
-                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <p>Empty</p>
-                </div>
-            `);
-            // Update substep 2
+            ` : `<div class="text-center text-gray-400 py-8"><p>Empty</p></div>`);
+
             $('#substep2-content').html(data.window.substep2_queue ? `
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-purple-600 mb-4">${data.window.substep2_queue.queue_number}</div>
-                    <button onclick="moveToSubstep3()"
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
-                        <span>Send to Step 3 Queue</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
+                    <div class="text-4xl font-bold text-purple-700 mb-4">${formatQueueNumber(data.window.substep2_queue.queue_number, windowNumber)}</div>
+                    <button onclick="moveToSubstep3()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Send to Step 3 Queue
                     </button>
                 </div>
-            ` : `
-                <div class="text-center text-gray-400 py-8">
-                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <p>Empty</p>
-                </div>
-            `);
+            ` : `<div class="text-center text-gray-400 py-8"><p>Empty</p></div>`);
 
-            // Update substep 3
             $('#substep3-content').html(data.window.substep3_queue ? `
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-green-600 mb-4">${data.window.substep3_queue.queue_number}</div>
-                    <button onclick="completeSubstep3()"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>Complete</span>
+                    <div class="text-4xl font-bold text-green-800 mb-4">${formatQueueNumber(data.window.substep3_queue.queue_number, windowNumber)}</div>
+                    <button onclick="completeSubstep3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Complete
                     </button>
                 </div>
-            ` : `
-                <div class="text-center text-gray-400 py-8">
-                    <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <p>Empty</p>
+            ` : `<div class="text-center text-gray-400 py-8"><p>Empty</p></div>`);
+        }
+
+        function renderWaitingList(queues) {
+            if (queues.length === 0) return '<div class="text-center text-gray-400 text-sm py-2">No customers waiting</div>';
+
+            return queues.slice(0, 3).map((queue, index) => `
+                <div class="p-2 bg-gray-50 rounded flex items-center space-x-3 text-sm">
+                    <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-800 text-xs">
+                        ${index + 1}
+                    </div>
+                    <div class="font-bold text-gray-800">${formatQueueNumber(queue.queue_number, windowNumber)}</div>
                 </div>
-            `);
-            }
+            `).join('');
+        }
 
             function updateWaitingQueues(data) {
                 // Update Step 1 waiting
                 $('#waiting-count-1').text(data.waiting_queues.length);
-                $('#waiting-list-1').html(renderWaitingList(data.waiting_queues, 'blue'));
+                $('#waiting-list-1').html(renderWaitingList(data.waiting_queues));
                 // Update Step 2 waiting
                 $('#waiting-count-2').text(data.waiting_substep2.length);
-                $('#waiting-list-2').html(renderWaitingList(data.waiting_substep2, 'purple'));
+                $('#waiting-list-2').html(renderWaitingList(data.waiting_substep2));
 
                 // Update Step 3 waiting
                 $('#waiting-count-3').text(data.waiting_substep3.length);
-                $('#waiting-list-3').html(renderWaitingList(data.waiting_substep3, 'green'));
+                $('#waiting-list-3').html(renderWaitingList(data.waiting_substep3));
 
                 // Enable/disable buttons
                 $('#btn-call-next').prop('disabled', data.waiting_queues.length === 0 || data.window.substep1_queue !== null);
@@ -478,20 +470,6 @@
                 $('#btn-call-next-2').prop('disabled', data.waiting_substep2.length === 0 || data.window.substep2_queue !== null);
                 $('#btn-select-queue-2').prop('disabled', data.waiting_substep2.length === 0 || data.window.substep2_queue !== null);
                 $('#btn-call-next-3').prop('disabled', data.waiting_substep3.length === 0 || data.window.substep3_queue !== null);
-            }
-
-            function renderWaitingList(queues, color) {
-                if (queues.length === 0) {
-                    return '<div class="text-center text-gray-400 text-sm py-2">No customers waiting</div>';
-                }
-                return queues.slice(0, 3).map((queue, index) => `
-                    <div class="p-2 bg-gray-50 rounded flex items-center space-x-3 text-sm">
-                        <div class="w-6 h-6 bg-${color}-100 rounded-full flex items-center justify-center font-bold text-${color}-600 text-xs">
-                            ${index + 1}
-                        </div>
-                        <div class="font-bold text-gray-800">${queue.queue_number}</div>
-                    </div>
-                `).join('');
             }
 
             function showNotification(message, type) {

@@ -16,7 +16,7 @@
             </div>
             <div class="border-b border-gray-200 mb-8">
                 <p class="text-center text-lg text-gray-700 py-4 font-bold">
-                    <label>Generated Queue Number:</label> <span class="text-blue-600" id="generated-queue-number"> </span>
+                    <label>Generated Queue Number:</label> <span class="text-blue-600"  id="generated-queue-number"> </span>
                 </p>
             </div>
 
@@ -27,10 +27,10 @@
                     onclick="generateQueue({{ $i }})"
                     id="window-btn-{{ $i }}"
                     class="window-btn
-                        {{ $i == 1 ? 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : '' }}
+                        {{ $i == 1 ? 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : '' }}
                         {{ $i == 2 ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' : '' }}
                         {{ $i == 3 ? 'bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600' : '' }}
-                        {{ $i == 4 ? 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : '' }}
+                        {{ $i == 4 ? 'bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700' : '' }}
                         text-white rounded-2xl p-8 transition-all transform hover:scale-105 shadow-xl
                         disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
@@ -109,6 +109,23 @@ let isGenerating = false;
 let refreshInterval = null;
 let lastDataTimestamp = 0;
 
+function formatQueueNumber(queueNumber, windowNumber) {
+    const configMap = {
+        1: { prefix: 'COS', color: 'text-blue-600' },
+        2: { prefix: 'COS', color: 'text-red-600' },
+        3: { prefix: 'COS', color: 'text-yellow-500' },
+        4: { prefix: 'JO',  color: 'text-orange-600' }
+    };
+
+    if (!queueNumber) return { text: '', color: 'text-gray-600' };
+
+    const config = configMap[windowNumber] ?? { prefix: `W${windowNumber}`, color: 'text-gray-600' };
+    return {
+        text: queueNumber.replace(/^W\d+-/, config.prefix + '-'),
+        color: config.color
+    };
+}
+
 function generateQueue(windowNumber) {
     if (isGenerating) return;
 
@@ -121,8 +138,16 @@ function generateQueue(windowNumber) {
 
     $.post('/queue/generate', { window_number: windowNumber })
         .done(function(response) {
-            showNotification('Queue generated: ' + response.queue.queue_number, 'success');
-            $('#generated-queue-number').text(response.queue.queue_number);
+            const queue = formatQueueNumber(
+                response.queue.queue_number,
+                response.queue.window_number
+            );
+
+            $('#generated-queue-number')
+                .text(queue.text)
+                .attr('class', `font-bold ${queue.color}`);
+
+            showNotification('Queue generated: ' + queue.text, 'success');
             refreshData();
             setTimeout(resetButtons, 1000);
         })
@@ -130,93 +155,94 @@ function generateQueue(windowNumber) {
             showNotification('Error generating queue', 'error');
             resetButtons();
         });
-}
-
-function resetButtons() {
-    isGenerating = false;
-    $('.window-btn').prop('disabled', false);
-    $('.btn-loading').addClass('hidden');
-    $('.btn-content').removeClass('hidden');
-}
-
-function refreshData() {
-    // OPTIMIZED: Single API call for all data
-    $.get('/api/system/all-data')
-        .done(function(data) {
-            // Only update if data changed
-            if (data.timestamp === lastDataTimestamp) return;
-            lastDataTimestamp = data.timestamp;
-
-            // Update statistics
-            $('.stat-waiting').text(data.statistics.waiting);
-            $('.stat-serving').text(data.statistics.serving);
-            $('.stat-completed').text(data.statistics.completed);
-
-            // Update window stats
-            for (let i = 1; i <= 4; i++) {
-                $(`.window-${i}-waiting`).text(data.window_stats[i].waiting);
-                $(`.window-${i}-serving`).text(data.window_stats[i].serving);
-            }
-
-            // Update recent queues
-            updateRecentQueues(data.recent_queues);
-        });
-}
-
-function updateRecentQueues(queues) {
-    let html = '';
-    queues.forEach(function(queue) {
-        let statusClass = queue.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
-                        (queue.status.includes('substep') ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800');
-        let statusText = queue.status.replace('substep', 'Step ');
-        let time = new Date(queue.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-        html += `
-            <div class="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
-                <div>
-                    <div class="font-bold text-orange-600 text-xl">${queue.queue_number}</div>
-                    <div class="text-sm text-gray-500">${time}</div>
-                </div>
-                <div class="text-right">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">
-                        ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}
-                    </span>
-                </div>
-            </div>
-        `;
-    });
-    $('#recent-queues').html(html);
-}
-
-function showNotification(message, type) {
-    const colors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        info: 'bg-blue-500'
-    };
-
-    const notification = $(`
-        <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
-            ${message}
-        </div>
-    `);
-
-    $('body').append(notification);
-    setTimeout(() => notification.fadeOut(300, function() { $(this).remove(); }), 3000);
-}
-
-// OPTIMIZED: Refresh every 5 seconds instead of 3
-refreshInterval = setInterval(refreshData, 5000);
-
-// Stop refresh when tab is hidden (saves resources)
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        clearInterval(refreshInterval);
-    } else {
-        refreshData();
-        refreshInterval = setInterval(refreshData, 5000);
     }
-});
+
+    function resetButtons() {
+        isGenerating = false;
+        $('.window-btn').prop('disabled', false);
+        $('.btn-loading').addClass('hidden');
+        $('.btn-content').removeClass('hidden');
+    }
+
+    function refreshData() {
+        // OPTIMIZED: Single API call for all data
+        $.get('/api/system/all-data')
+            .done(function(data) {
+                // Only update if data changed
+                if (data.timestamp === lastDataTimestamp) return;
+                lastDataTimestamp = data.timestamp;
+
+                // Update statistics
+                $('.stat-waiting').text(data.statistics.waiting);
+                $('.stat-serving').text(data.statistics.serving);
+                $('.stat-completed').text(data.statistics.completed);
+
+                // Update window stats
+                for (let i = 1; i <= 4; i++) {
+                    $(`.window-${i}-waiting`).text(data.window_stats[i].waiting);
+                    $(`.window-${i}-serving`).text(data.window_stats[i].serving);
+                }
+
+                // Update recent queues
+                updateRecentQueues(data.recent_queues);
+            });
+    }
+
+    function updateRecentQueues(queues) {
+        let html = '';
+        queues.forEach(function(queue) {
+            const queueDisplay = formatQueueNumber(queue.queue_number, queue.window_number);
+            let statusClass = queue.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
+                            (queue.status.includes('substep') ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800');
+            let statusText = queue.status.replace('substep', 'Step ');
+            let time = new Date(queue.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            html += `
+                <div class="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-xl ${queueDisplay.color}">${queueDisplay.text}</div>
+                        <div class="text-sm text-gray-500">${time}</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">
+                            ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+        $('#recent-queues').html(html);
+    }
+
+    function showNotification(message, type) {
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500'
+        };
+
+        const notification = $(`
+            <div class="fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+                ${message}
+            </div>
+        `);
+
+        $('body').append(notification);
+        setTimeout(() => notification.fadeOut(300, function() { $(this).remove(); }), 3000);
+    }
+
+    // OPTIMIZED: Refresh every 5 seconds instead of 3
+    refreshInterval = setInterval(refreshData, 5000);
+
+    // Stop refresh when tab is hidden (saves resources)
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            clearInterval(refreshInterval);
+        } else {
+            refreshData();
+            refreshInterval = setInterval(refreshData, 5000);
+        }
+    });
 </script>
 
 <style>

@@ -19,7 +19,7 @@
                     <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 border-4 border-blue-300">
                         <div class="text-center">
                             <div class="text-sm text-gray-600 mb-2">Now Serving</div>
-                            <div class="text-5xl font-bold text-blue-600">{{ $window->substep1Queue->queue_number }}</div>
+                            <div class="text-5xl font-bold text-blue-600">{{ formatQueueNumber($window->substep1Queue->queue_number, $window->window_number) }}</div>
                             <div class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-full font-semibold animate-pulse">
                                 IN PROGRESS
                             </div>
@@ -44,7 +44,7 @@
                     <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-8 border-4 border-purple-300">
                         <div class="text-center">
                             <div class="text-sm text-gray-600 mb-2">Now Serving</div>
-                            <div class="text-5xl font-bold text-purple-600">{{ $window->substep2Queue->queue_number }}</div>
+                            <div class="text-5xl font-bold text-purple-600">{{ formatQueueNumber($window->substep2Queue->queue_number, $window->window_number) }}</div>
                             <div class="mt-4 inline-block px-4 py-2 bg-purple-500 text-white rounded-full font-semibold animate-pulse">
                                 IN PROGRESS
                             </div>
@@ -69,7 +69,7 @@
                     <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 border-4 border-green-300">
                         <div class="text-center">
                             <div class="text-sm text-gray-600 mb-2">Now Serving</div>
-                            <div class="text-5xl font-bold text-green-600">{{ $window->substep3Queue->queue_number }}</div>
+                            <div class="text-5xl font-bold text-green-600">{{ formatQueueNumber($window->substep3Queue->queue_number, $window->window_number) }}</div>
                             <div class="mt-4 inline-block px-4 py-2 bg-green-500 text-white rounded-full font-semibold animate-pulse">
                                 IN PROGRESS
                             </div>
@@ -95,6 +95,12 @@
 const windowNumber = {{ $window->window_number }};
 let refreshInterval = null;
 let lastDataHash = '';
+
+function formatQueueNumber(queueNumber, windowNumber) {
+    const prefixMap = {1: 'COS', 2: 'COS', 3: 'COS', 4: 'JO'};
+    const prefix = prefixMap[windowNumber] ?? `W${windowNumber}`;
+    return queueNumber.replace(/^W\d+-/, prefix + '-');
+}
 
 function refreshDisplayData() {
     $.get(`/api/window/${windowNumber}/data`)
