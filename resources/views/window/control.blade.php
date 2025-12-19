@@ -11,12 +11,20 @@
             <!-- Substeps Display -->
             <div class="grid grid-cols-3 gap-4 mb-8">
                 <!-- Substep 1 -->
-                <div class="bg-blue-50 rounded-xl p-6 border-4 border-blue-200">
+                <div class="rounded-xl p-6 border-4 border-blue-200
+                        {{ $window->window_number == 1 ? 'bg-blue-50' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-50' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-50' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-50' : '' }}">
                     <h3 class="text-center font-bold text-blue-800 mb-4">STEP 1</h3>
                     <div id="substep1-content">
                         @if($window->substep1Queue)
                         <div class="text-center">
-                            <div class="text-4xl font-bold text-blue-600 mb-4">{{ $window->substep1Queue->queue_number }}</div>
+                            <div class="text-4xl font-bold mb-4
+                        {{ $window->window_number == 1 ? 'text-blue-600' : '' }}
+                        {{ $window->window_number == 2 ? 'text-red-600' : '' }}
+                        {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
+                        {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $window->substep1Queue->queue_number }}</div>
                             <button onclick="moveToSubstep2()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
                                 Send to Step 2 Queue
                             </button>
@@ -28,12 +36,20 @@
                 </div>
 
                 <!-- Substep 2 -->
-                <div class="bg-purple-50 rounded-xl p-6 border-4 border-purple-200">
+                <div class="rounded-xl p-6 border-4 border-purple-200
+                        {{ $window->window_number == 1 ? 'bg-blue-50' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-50' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-50' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-50' : '' }}">
                     <h3 class="text-center font-bold text-purple-800 mb-4">STEP 2</h3>
                     <div id="substep2-content">
                         @if($window->substep2Queue)
                         <div class="text-center">
-                            <div class="text-4xl font-bold text-purple-600 mb-4">{{ $window->substep2Queue->queue_number }}</div>
+                            <div class="text-4xl font-bold mb-4
+                            {{ $window->window_number == 1 ? 'text-blue-600' : '' }}
+                            {{ $window->window_number == 2 ? 'text-red-600' : '' }}
+                            {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
+                            {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $window->substep2Queue->queue_number }}</div>
                             <button onclick="moveToSubstep3()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
                                 Send to Step 3 Queue
                             </button>
@@ -45,12 +61,20 @@
                 </div>
 
                 <!-- Substep 3 -->
-                <div class="bg-green-50 rounded-xl p-6 border-4 border-green-200">
+                <div class="rounded-xl p-6 border-4 border-green-200
+                        {{ $window->window_number == 1 ? 'bg-blue-50' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-50' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-50' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-50' : '' }}">
                     <h3 class="text-center font-bold text-green-800 mb-4">STEP 3</h3>
                     <div id="substep3-content">
                         @if($window->substep3Queue)
                         <div class="text-center">
-                            <div class="text-4xl font-bold text-green-600 mb-4">{{ $window->substep3Queue->queue_number }}</div>
+                            <div class="text-4xl font-bold mb-4
+                            {{ $window->window_number == 1 ? 'text-blue-600' : '' }}
+                            {{ $window->window_number == 2 ? 'text-red-600' : '' }}
+                            {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
+                            {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $window->substep3Queue->queue_number }}</div>
                             <button onclick="completeSubstep3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
                                 Complete
                             </button>
@@ -65,7 +89,11 @@
             <!-- Step Actions -->
             <div class="grid grid-cols-3 space-x-6">
                 <!-- Step 1 Actions -->
-                <div class="p-4 bg-blue-50 rounded-xl">
+                <div class="p-4 rounded-xl
+                        {{ $window->window_number == 1 ? 'bg-blue-50 border-2 border-blue-200 ' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-50 border-2 border-red-200 ' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-50 border-2 border-yellow-200 ' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-50 border-2 border-orange-200 ' : '' }}">
                     <h3 class="font-bold text-blue-800 mb-3">Step 1 Actions</h3>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <button onclick="callNext()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
@@ -80,8 +108,16 @@
                     </div>
                     <div id="waiting-list-1" class="space-y-2">
                         @foreach($waitingQueues->take(3) as $queue)
-                        <div class="p-3 bg-blue-50 border-2 border-blue-200 rounded-lg flex justify-between items-center">
-                            <div class="font-bold text-blue-600">{{ $queue->queue_number }}</div>
+                        <div class="p-3 border-2 border-blue-200 rounded-lg flex justify-between items-center
+                        {{ $window->window_number == 1 ? 'bg-blue-100 border-blue-200' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-100 border-red-200' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-100 border-yellow-200' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-100 border-orange-200' : '' }}">
+                            <div class="font-bold
+                        {{ $window->window_number == 1 ? 'text-blue-600' : '' }}
+                        {{ $window->window_number == 2 ? 'text-red-600' : '' }}
+                        {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
+                        {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $queue->queue_number }}</div>
                             <div class="text-sm text-gray-500">{{ $queue->created_at->format('h:i A') }}</div>
                         </div>
                         @endforeach
@@ -89,7 +125,11 @@
                 </div>
 
                 <!-- Step 2 Actions -->
-                <div class="p-4 bg-purple-50 rounded-xl">
+                <div class="p-4 rounded-xl
+                        {{ $window->window_number == 1 ? 'bg-blue-50 border-2 border-blue-200 ' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-50 border-2 border-red-200 ' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-50 border-2 border-yellow-200 ' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-50 border-2 border-orange-200 ' : '' }}">
                     <h3 class="font-bold text-purple-800 mb-3">Step 2 Actions</h3>
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <button onclick="callNextToSubstep2()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg">
@@ -104,8 +144,16 @@
                     </div>
                     <div id="waiting-list-2" class="space-y-2">
                         @foreach($waitingSubstep2->take(3) as $queue)
-                        <div class="p-3 bg-blue-50 border-2 border-blue-200 rounded-lg flex justify-between items-center">
-                            <div class="font-bold text-blue-600">{{ $queue->queue_number }}</div>
+                        <div class="p-3 border-2 rounded-lg flex justify-between items-center
+                        {{ $window->window_number == 1 ? 'bg-blue-100 border-blue-200' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-100 border-red-200' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-100 border-yellow-200' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-100 border-orange-200' : '' }}">
+                            <div class="font-bold
+                        {{ $window->window_number == 1 ? 'text-blue-600' : '' }}
+                        {{ $window->window_number == 2 ? 'text-red-600' : '' }}
+                        {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
+                        {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $queue->queue_number }}</div>
                             <div class="text-sm text-gray-500">{{ $queue->created_at->format('h:i A') }}</div>
                         </div>
                         @endforeach
@@ -113,7 +161,11 @@
                 </div>
 
                 <!-- Step 3 Actions -->
-                <div class="p-4 bg-green-50 rounded-xl">
+                <div class="p-4 rounded-xl
+                        {{ $window->window_number == 1 ? 'bg-blue-50 border-2 border-blue-200 ' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-50 border-2 border-red-200 ' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-50 border-2 border-yellow-200 ' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-50 border-2 border-orange-200 ' : '' }}">
                     <h3 class="font-bold text-green-800 mb-3">Step 3 Actions</h3>
                     <button onclick="callNextToSubstep3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
                         Call Next to Step 3
@@ -123,8 +175,16 @@
                     </div>
                     <div id="waiting-list-3" class="space-y-2">
                         @foreach($waitingSubstep3->take(3) as $queue)
-                        <div class="p-3 bg-blue-50 border-2 border-blue-200 rounded-lg flex justify-between items-center">
-                            <div class="font-bold text-blue-600">{{ $queue->queue_number }}</div>
+                        <div class="p-3 border-2 rounded-lg flex justify-between items-center
+                        {{ $window->window_number == 1 ? 'bg-blue-100 border-blue-200' : '' }}
+                        {{ $window->window_number == 2 ? 'bg-red-100 border-red-200' : '' }}
+                        {{ $window->window_number == 3 ? 'bg-yellow-100 border-yellow-200' : '' }}
+                        {{ $window->window_number == 4 ? 'bg-orange-100 border-orange-200' : '' }}">
+                            <div class="font-bold
+                        {{ $window->window_number == 1 ? 'text-blue-600' : '' }}
+                        {{ $window->window_number == 2 ? 'text-red-600' : '' }}
+                        {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
+                        {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $queue->queue_number }}</div>
                             <div class="text-sm text-gray-500">{{ $queue->created_at->format('h:i A') }}</div>
                         </div>
                         @endforeach
