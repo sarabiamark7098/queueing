@@ -17,13 +17,12 @@
 
             <!-- Daily Reset Info Banner -->
             <div class="mb-6 p-4 border-2 border-blue-200 rounded-xl flex justify-center items-center">
-    <div class="text-center">
-        <label class="text-xl font-bold text-gray-800 block mb-2">Generated Queue:</label>
-        <span class="text-2xl font-bold text-blue-600" id="generated-queue-number"></span>
-    </div>
-</div>
+                <div class="text-center">
+                    <label class="text-xl font-bold text-gray-800 block mb-2">Generated Queue:</label>
+                    <span class="text-2xl font-bold text-blue-600" id="generated-queue-number"></span>
+                </div>
+            </div>
 
-            <!-- Window Buttons Grid -->
             <div class="grid grid-cols-2 gap-6 mb-8">
                 <!-- Window 1 - BLUE -->
                 <button onclick="generateQueue(1)" id="window-btn-1"
