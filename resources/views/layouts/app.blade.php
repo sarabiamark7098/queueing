@@ -56,10 +56,6 @@
                        class="flex-1 px-2 py-1 rounded text-xs font-semibold bg-blue-600 hover:bg-blue-700 transition text-center">
                         W{{ $i }} Control
                     </a>
-                    <a href="{{ route('window.display', $i) }}"
-                       class="flex-1 px-2 py-1 rounded text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 transition text-center">
-                        W{{ $i }} Display
-                    </a>
                 </div>
                 @endfor
             </div>
