@@ -76,6 +76,27 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
+        function showToast(message, type = 'success') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
+
+            const toast = $(`
+                <div class="fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-white ${colors[type]} animate-fade-in">
+                    ${message}
+                </div>
+            `);
+
+            $('body').append(toast);
+
+            setTimeout(() => {
+                toast.addClass('opacity-0 translate-x-10');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
 
     @stack('scripts')
