@@ -8,12 +8,11 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
-    {
-        // Reset queue sequences daily at midnight
-        $schedule->command('queues:reset-daily')
-                 ->dailyAt('00:00')
-                 ->timezone('Asia/Manila');
-    }
+{
+    $schedule->command('db:migrate-fresh-seed-daily')
+        ->dailyAt('23:59')
+        ->timezone('Asia/Manila');
+}
 
     protected function commands(): void
     {
