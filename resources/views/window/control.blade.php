@@ -78,6 +78,14 @@
                     <div class="text-sm font-semibold text-gray-600 mb-2">
                         Waiting for Step 1: <span id="waiting-count-1">{{ $waitingQueues->count() }}</span>
                     </div>
+                    <div id="waiting-list-1" class="space-y-2">
+                        @foreach($waitingQueues->take(3) as $queue)
+                        <div class="p-3 bg-blue-50 border-2 border-blue-200 rounded-lg flex justify-between items-center">
+                            <div class="font-bold text-blue-600">{{ $queue->queue_number }}</div>
+                            <div class="text-sm text-gray-500">{{ $queue->created_at->format('h:i A') }}</div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
 
                 <!-- Step 2 Actions -->
@@ -94,6 +102,14 @@
                     <div class="text-sm font-semibold text-gray-600 mb-2">
                         Waiting for Step 2: <span id="waiting-count-2">{{ $waitingSubstep2->count() }}</span>
                     </div>
+                    <div id="waiting-list-2" class="space-y-2">
+                        @foreach($waitingSubstep2->take(3) as $queue)
+                        <div class="p-3 bg-blue-50 border-2 border-blue-200 rounded-lg flex justify-between items-center">
+                            <div class="font-bold text-blue-600">{{ $queue->queue_number }}</div>
+                            <div class="text-sm text-gray-500">{{ $queue->created_at->format('h:i A') }}</div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
 
                 <!-- Step 3 Actions -->
@@ -104,6 +120,14 @@
                     </button>
                     <div class="mt-4 text-sm font-semibold text-gray-600">
                         Waiting for Step 3: <span id="waiting-count-3">{{ $waitingSubstep3->count() }}</span>
+                    </div>
+                    <div id="waiting-list-3" class="space-y-2">
+                        @foreach($waitingSubstep3->take(3) as $queue)
+                        <div class="p-3 bg-blue-50 border-2 border-blue-200 rounded-lg flex justify-between items-center">
+                            <div class="font-bold text-blue-600">{{ $queue->queue_number }}</div>
+                            <div class="text-sm text-gray-500">{{ $queue->created_at->format('h:i A') }}</div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
