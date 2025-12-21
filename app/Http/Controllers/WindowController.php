@@ -8,6 +8,17 @@ use Illuminate\Http\Request;
 
 class WindowController extends Controller
 {
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Show the control page for a window
+ *
+ * @param int $windowNumber
+ * @return \Illuminate\Contracts\View\View
+ * @throws \Illuminate\Http\Exceptions\HttpResponseException
+ */
+/*******  177d9d27-d196-48e6-9dcb-f9acf120d50f  *******/    /**
+     * Display window control page
+     */
     public function show($windowNumber)
     {
         $window = Window::getWithSubsteps($windowNumber);
@@ -23,6 +34,9 @@ class WindowController extends Controller
         return view('window.control', compact('window', 'waitingQueues', 'waitingSubstep2', 'waitingSubstep3'));
     }
 
+    /**
+     * Display window customer display
+     */
     public function display($windowNumber)
     {
         $window = Window::getWithSubsteps($windowNumber);
@@ -34,6 +48,9 @@ class WindowController extends Controller
         return view('window.display', compact('window'));
     }
 
+    /**
+     * Call next queue to substep 1
+     */
     public function callNext($windowNumber)
     {
         $window = Window::where('window_number', $windowNumber)->first();
@@ -54,6 +71,9 @@ class WindowController extends Controller
         ]);
     }
 
+    /**
+     * Call specific queue to substep 1
+     */
     public function callSpecific(Request $request, $windowNumber)
     {
         $request->validate([
@@ -78,6 +98,9 @@ class WindowController extends Controller
         ]);
     }
 
+    /**
+     * Move from substep 1 to substep 2
+     */
     public function moveToSubstep2($windowNumber)
     {
         $window = Window::where('window_number', $windowNumber)->first();
@@ -95,40 +118,9 @@ class WindowController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function moveToSubstep3($windowNumber)
-    {
-        $window = Window::where('window_number', $windowNumber)->first();
-
-        if (!$window) {
-            return response()->json(['error' => 'Window not found'], 404);
-        }
-
-        $success = $window->moveToSubstep3();
-
-        if (!$success) {
-            return response()->json(['error' => 'Cannot move to substep 3'], 400);
-        }
-
-        return response()->json(['success' => true]);
-    }
-
-    public function completeSubstep3($windowNumber)
-    {
-        $window = Window::where('window_number', $windowNumber)->first();
-
-        if (!$window) {
-            return response()->json(['error' => 'Window not found'], 404);
-        }
-
-        $success = $window->completeSubstep3();
-
-        if (!$success) {
-            return response()->json(['error' => 'No queue in substep 3'], 400);
-        }
-
-        return response()->json(['success' => true]);
-    }
-
+    /**
+     * Call next queue to substep 2
+     */
     public function callNextToSubstep2($windowNumber)
     {
         $window = Window::where('window_number', $windowNumber)->first();
@@ -149,6 +141,9 @@ class WindowController extends Controller
         ]);
     }
 
+    /**
+     * Call specific queue to substep 2
+     */
     public function callSpecificToSubstep2(Request $request, $windowNumber)
     {
         $request->validate([
@@ -173,7 +168,30 @@ class WindowController extends Controller
         ]);
     }
 
-   public function callNextToSubstep3($windowNumber)
+    /**
+     * Move from substep 2 to substep 3
+     */
+    public function moveToSubstep3($windowNumber)
+    {
+        $window = Window::where('window_number', $windowNumber)->first();
+
+        if (!$window) {
+            return response()->json(['error' => 'Window not found'], 404);
+        }
+
+        $success = $window->moveToSubstep3();
+
+        if (!$success) {
+            return response()->json(['error' => 'Cannot move to substep 3'], 400);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Call next queue to substep 3
+     */
+    public function callNextToSubstep3($windowNumber)
     {
         $window = Window::where('window_number', $windowNumber)->first();
 
@@ -193,6 +211,29 @@ class WindowController extends Controller
         ]);
     }
 
+    /**
+     * Complete substep 3
+     */
+    public function completeSubstep3($windowNumber)
+    {
+        $window = Window::where('window_number', $windowNumber)->first();
+
+        if (!$window) {
+            return response()->json(['error' => 'Window not found'], 404);
+        }
+
+        $success = $window->completeSubstep3();
+
+        if (!$success) {
+            return response()->json(['error' => 'No queue in substep 3'], 400);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Get window data (API)
+     */
     public function getData($windowNumber)
     {
         $window = Window::getWithSubsteps($windowNumber);

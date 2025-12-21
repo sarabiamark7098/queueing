@@ -13,15 +13,24 @@ return new class extends Migration
     {
         Schema::create('queues', function (Blueprint $table) {
             $table->id();
-            $table->string('queue_number')->unique();
+            $table->string('queue_number');
             $table->integer('window_number');
-            $table->enum('status', ['waiting', 'substep1', 'waiting_substep2', 'substep2', 'waiting_substep3', 'substep3', 'completed'])->default('waiting');
+            $table->enum('status', [
+                'waiting',
+                'substep1',
+                'waiting_substep2',
+                'substep2',
+                'waiting_substep3',
+                'substep3',
+                'completed'
+            ])->default('waiting');
             $table->integer('current_substep')->nullable();
             $table->timestamps();
 
             $table->index(['window_number', 'status']);
-            $table->index('queue_number');
             $table->index('created_at');
+
+            $table->unique(['queue_number', 'window_number', 'created_at']);
         });
     }
 
