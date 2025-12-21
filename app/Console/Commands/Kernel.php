@@ -10,7 +10,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
 {
     $schedule->command('db:migrate-fresh-seed-daily')
-        ->dailyAt('23:59')
+        ->dailyAt('13:15')
         ->timezone('Asia/Manila');
 }
 
