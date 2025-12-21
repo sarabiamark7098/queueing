@@ -30,7 +30,7 @@ return new class extends Migration
             $table->index(['window_number', 'status']);
             $table->index('created_at');
 
-            $table->unique(['queue_number', 'window_number']);
+            $table->unique(['queue_number', 'window_number', 'created_at']);
         });
     }
 

@@ -61,9 +61,8 @@ class Window extends Model
     public function checkAndResetDaily(): void
     {
         $today = now()->toDateString();
-        $lastResetDate = $this->last_reset_date->toDateString();
-        
-        if ($lastResetDate !== $today) {
+
+        if (!$this->last_reset_date || $this->last_reset_date->toDateString() !== $today) {
             $this->update([
                 'last_queue_number' => 0,
                 'last_reset_date' => $today

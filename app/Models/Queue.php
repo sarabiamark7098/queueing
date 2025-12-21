@@ -39,7 +39,7 @@ class Queue extends Model
         $sequence = $window->getNextSequence();
 
         $queueNumber = $window->prefix . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
-
+        
         while (self::where('queue_number', $queueNumber)
                 ->where('window_number', $windowNumber)
                 ->whereDate('created_at', now()->toDateString())
