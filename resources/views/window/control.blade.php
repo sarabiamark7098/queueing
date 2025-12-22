@@ -216,45 +216,45 @@
 const windowNumber = {{ $window->window_number }};
 
 function callNext() {
-    $.post(`/window/${windowNumber}/call-next`)
+    $.post(`${BASE_URL}/window/${windowNumber}/call-next`)
         .done(() => { showToast('Queue called', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 
 function moveToSubstep2() {
-    $.post(`/window/${windowNumber}/move-to-substep2`)
+    $.post(`${BASE_URL}/window/${windowNumber}/move-to-substep2`)
         .done(() => { showToast('Moved to Step 2 queue', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 
 function callNextToSubstep2() {
-    $.post(`/window/${windowNumber}/call-next-substep2`)
+    $.post(`${BASE_URL}/window/${windowNumber}/call-next-substep2`)
         .done(() => { showToast('Queue called to Step 2', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 
 function moveToSubstep3() {
-    $.post(`/window/${windowNumber}/move-to-substep3`)
+    $.post(`${BASE_URL}/window/${windowNumber}/move-to-substep3`)
         .done(() => { showToast('Moved to Step 3 queue', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 
 function callNextToSubstep3() {
-    $.post(`/window/${windowNumber}/call-next-substep3`)
+    $.post(`${BASE_URL}/window/${windowNumber}/call-next-substep3`)
         .done(() => { showToast('Queue called to Step 3', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 
 function completeSubstep3() {
     if (!confirm('Complete this service?')) return;
-    $.post(`/window/${windowNumber}/complete`)
+    $.post(`${BASE_URL}/window/${windowNumber}/complete`)
         .done(() => { showToast('Service completed!', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 
 function openSelectModal(step) {
     $('#selectModal').removeClass('hidden');
-    const endpoint = step === 1 ? `/api/queue/waiting/${windowNumber}` : `/api/window/${windowNumber}`;
+    const endpoint = step === 1 ? `${BASE_URL}/api/queue/waiting/${windowNumber}` : `${BASE_URL}/api/window/${windowNumber}`;
 
     $.get(endpoint).done(data => {
         const queues = step === 1 ? data : data.waiting_substep2;
@@ -282,7 +282,7 @@ function closeSelectModal() {
 function callSpecific(queueId, step) {
     closeSelectModal();
     const endpoint = step === 1 ? 'call-specific' : 'call-specific-substep2';
-    $.post(`/window/${windowNumber}/${endpoint}`, { queue_id: queueId })
+    $.post(`${BASE_URL}/window/${windowNumber}/${endpoint}`, { queue_id: queueId })
         .done(() => { showToast('Queue called', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }

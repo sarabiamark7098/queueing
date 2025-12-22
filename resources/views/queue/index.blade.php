@@ -207,7 +207,7 @@ function generateQueue(windowNumber) {
     btn.find('.btn-content').addClass('hidden');
     btn.find('.btn-loading').removeClass('hidden');
 
-    $.post('/queue/generate', { window_number: windowNumber })
+    $.post(`${BASE_URL}/queue/generate`, { window_number: windowNumber })
         .done(function(response) {
             showToast('Queue generated: ' + response.queue.queue_number, 'success');
             const windowNum = response.queue.window_number;
@@ -235,7 +235,7 @@ function resetButtons() {
 }
 
 function refreshData() {
-    $.get('/api/system/all-data')
+    $.get(`${BASE_URL}/api/system/all-data`)
         .done(function(data) {
             if (data.timestamp === lastDataTimestamp) return;
             lastDataTimestamp = data.timestamp;

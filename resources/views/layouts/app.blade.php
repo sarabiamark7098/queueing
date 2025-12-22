@@ -69,7 +69,7 @@
 
     <!-- Setup AJAX CSRF Token -->
     <script>
-        window.APP_URL = "{{ url('/') }}";
+        window.BASE_URL = "{{ url('/') }}";
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
