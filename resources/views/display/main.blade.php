@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+<audio id="bellSound" preload="auto">
+    <source src="{{ asset('sound/bellmark.wav') }}" type="audio/wav">
+</audio>
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
     <div class="max-w-[1920px] mx-auto">
         <div class="text-center mb-6">
@@ -118,6 +121,25 @@
 
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const bell = document.getElementById('bellSound');
+
+    // Get all currently displayed queue numbers
+    const currentQueues = Array.from(
+        document.querySelectorAll('.text-2xl.font-bold')
+    ).map(el => el.innerText.trim()).join(',');
+
+    const lastQueues = localStorage.getItem('lastQueues');
+
+    if (lastQueues && lastQueues !== currentQueues) {
+        bell.play().catch(() => {});
+    }
+
+    localStorage.setItem('lastQueues', currentQueues);
+});
+
+// Auto refresh
 setInterval(() => location.reload(), 3000);
 </script>
 @endpush
+
