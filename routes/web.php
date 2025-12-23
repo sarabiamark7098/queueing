@@ -15,6 +15,8 @@ Route::post('/queue/generate', [QueueController::class, 'generate'])->name('queu
 Route::get('/window/{windowNumber}/control', [WindowController::class, 'show'])->name('window.control');
 Route::post('/window/{windowNumber}/call-next', [WindowController::class, 'callNext'])->name('window.callNext');
 Route::post('/window/{windowNumber}/call-specific', [WindowController::class, 'callSpecific'])->name('window.callSpecific');
+Route::post('/window/{windowNumber}/back-to-substep1-waiting',  [WindowController::class, 'backToSubstep1Waiting'])->name('window.backToSubstep1Waiting');
+Route::post('/window/{windowNumber}/back-to-substep2-waiting',  [WindowController::class, 'backToSubstep2Waiting'])->name('window.backToSubstep2Waiting');
 Route::post('/window/{windowNumber}/move-to-substep2', [WindowController::class, 'moveToSubstep2'])->name('window.moveToSubstep2');
 Route::post('/window/{windowNumber}/call-next-substep2', [WindowController::class, 'callNextToSubstep2'])->name('window.callNextToSubstep2');
 Route::post('/window/{windowNumber}/call-specific-substep2', [WindowController::class, 'callSpecificToSubstep2'])->name('window.callSpecificToSubstep2');

@@ -25,9 +25,15 @@
                         {{ $window->window_number == 2 ? 'text-red-600' : '' }}
                         {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
                         {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $window->substep1Queue->queue_number }}</div>
-                            <button onclick="moveToSubstep2()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-                                Send to Step 2 Queue
-                            </button>
+                            <div class="flex gap-4">
+                                <button onclick="backToSubstep1Waiting()"
+                                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">
+                                    Return to Waiting
+                                </button>
+                                <button onclick="moveToSubstep2()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                                    Send to Step 2 Queue
+                                </button>
+                            </div>
                         </div>
                         @else
                         <div class="text-center text-gray-400 py-8">Empty</div>
@@ -50,9 +56,14 @@
                             {{ $window->window_number == 2 ? 'text-red-600' : '' }}
                             {{ $window->window_number == 3 ? 'text-yellow-600' : '' }}
                             {{ $window->window_number == 4 ? 'text-orange-600' : '' }}">{{ $window->substep2Queue->queue_number }}</div>
-                            <button onclick="moveToSubstep3()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                                Send to Step 3 Queue
-                            </button>
+                            <div class="flex gap-4">
+                                <button onclick="backToSubstep2Waiting()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">
+                                    Return to Waiting
+                                </button>
+                                <button onclick="moveToSubstep3()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                                    Send to Step 3 Queue
+                                </button>
+                            </div>
                         </div>
                         @else
                         <div class="text-center text-gray-400 py-8">Empty</div>
@@ -218,6 +229,18 @@ const windowNumber = {{ $window->window_number }};
 function callNext() {
     $.post(`${BASE_URL}/window/${windowNumber}/call-next`)
         .done(() => { showToast('Queue called', 'success'); setTimeout(() => location.reload(), 500); })
+        .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
+}
+
+function backToSubstep1Waiting() {
+    $.post(`${BASE_URL}/window/${windowNumber}/back-to-substep1-waiting`)
+        .done(() => { showToast('Back to Step 1 queue', 'success'); setTimeout(() => location.reload(), 500); })
+        .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
+}
+
+function backToSubstep2Waiting() {
+    $.post(`${BASE_URL}/window/${windowNumber}/back-to-substep2-waiting`)
+        .done(() => { showToast('Back to Step 1 queue', 'success'); setTimeout(() => location.reload(), 500); })
         .fail(xhr => showToast(xhr.responseJSON?.error || 'Error', 'error'));
 }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class Window extends Model
 {
@@ -145,6 +146,50 @@ class Window extends Model
         $this->update(['substep1_queue_id' => $queue->id]);
 
         return $queue;
+    }
+
+    /**
+     * return from substep 1 to substep 1 waiting
+     */
+    public function backToSubstep1Waiting(): bool
+    {
+        if (!$this->substep1_queue_id) {
+            return false;
+        }
+
+        return DB::transaction(function () {
+            $queue = Queue::find($this->substep1_queue_id);
+            $queue->update([
+                'status' => 'waiting',
+                'current_substep' => null
+            ]);
+
+            $this->update(['substep1_queue_id' => null]);
+
+            return true;
+        });
+    }
+
+    /**
+     * return from substep 2 to substep 2 waiting
+     */
+    public function backToSubstep2Waiting(): bool
+    {
+        if (!$this->substep2_queue_id) {
+            return false;
+        }
+
+        return DB::transaction(function () {
+            $queue = Queue::find($this->substep2_queue_id);
+            $queue->update([
+                'status' => 'waiting_substep2',
+                'current_substep' => null
+            ]);
+
+            $this->update(['substep2_queue_id' => null]);
+
+            return true;
+        });
     }
 
     /**

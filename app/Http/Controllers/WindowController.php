@@ -8,17 +8,6 @@ use Illuminate\Http\Request;
 
 class WindowController extends Controller
 {
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Show the control page for a window
- *
- * @param int $windowNumber
- * @return \Illuminate\Contracts\View\View
- * @throws \Illuminate\Http\Exceptions\HttpResponseException
- */
-/*******  177d9d27-d196-48e6-9dcb-f9acf120d50f  *******/    /**
-     * Display window control page
-     */
     public function show($windowNumber)
     {
         $window = Window::getWithSubsteps($windowNumber);
@@ -96,6 +85,40 @@ class WindowController extends Controller
             'success' => true,
             'queue' => $queue
         ]);
+    }
+
+    public function backToSubstep1Waiting($windowNumber)
+    {
+        $window = Window::where('window_number', $windowNumber)->first();
+
+        if (!$window) {
+            return response()->json(['error' => 'Window not found'], 404);
+        }
+
+        $success = $window->backToSubstep1Waiting();
+
+        if (!$success) {
+            return response()->json(['error' => 'Cannot return to substep 1 waiting'], 400);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function backToSubstep2Waiting($windowNumber)
+    {
+        $window = Window::where('window_number', $windowNumber)->first();
+
+        if (!$window) {
+            return response()->json(['error' => 'Window not found'], 404);
+        }
+
+        $success = $window->backToSubstep2Waiting();
+
+        if (!$success) {
+            return response()->json(['error' => 'Cannot return to substep 2 waiting'], 400);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
